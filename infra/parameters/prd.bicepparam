@@ -1,3 +1,3 @@
-using '../servicebus.bicep'
+using '../main.bicep'
 
 param environmentName = 'prd'

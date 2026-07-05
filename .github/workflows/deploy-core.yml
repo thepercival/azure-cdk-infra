@@ -19,7 +19,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Azure login
         uses: azure/login@v2
@@ -45,8 +45,8 @@ jobs:
           inlineScript: |
             az deployment group create \
               --resource-group rg-core-dev \
-              --template-file infra/servicebus/servicebus.bicep \
-              --parameters infra/servicebus/parameters/dev.bicepparam
+              --template-file infra/main.bicep \
+              --parameters infra/parameters/dev.bicepparam
 
   deploy-acc:
     if: github.event.pull_request.merged == true
@@ -56,7 +56,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Azure login
         uses: azure/login@v2
@@ -82,8 +82,8 @@ jobs:
           inlineScript: |
             az deployment group create \
               --resource-group rg-core-acc \
-              --template-file infra/servicebus/servicebus.bicep \
-              --parameters infra/servicebus/parameters/acc.bicepparam
+              --template-file infra/main.bicep \
+              --parameters infra/parameters/acc.bicepparam
 
   deploy-prd:
     needs: deploy-acc
@@ -93,7 +93,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Azure login
         uses: azure/login@v2
@@ -119,5 +119,5 @@ jobs:
           inlineScript: |
             az deployment group create \
               --resource-group rg-core-prd \
-              --template-file infra/servicebus/servicebus.bicep \
-              --parameters infra/servicebus/parameters/prd.bicepparam
+              --template-file infra/main.bicep \
+              --parameters infra/parameters/prd.bicepparam
