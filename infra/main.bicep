@@ -1,10 +1,10 @@
-param environmentName string
 param location string = resourceGroup().location
+param environmentName string
 
 module serviceBus './servicebus.bicep' = {
   name: 'servicebus'
   params: {
-    environmentName: environmentName
+    serviceBusName: 'sb-cdk-${environmentName}'
     location: location
   }
 }

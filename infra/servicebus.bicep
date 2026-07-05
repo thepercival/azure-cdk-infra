@@ -1,7 +1,5 @@
-param environmentName string
-param location string = resourceGroup().location
-
-var serviceBusName = 'sb-core-${environmentName}'
+param location string
+param serviceBusName string
 
 resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2026-01-01' = {
   name: serviceBusName
