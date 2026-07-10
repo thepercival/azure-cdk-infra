@@ -1,8 +1,11 @@
 param location string = resourceGroup().location
 param environment string
+param administratorPrincipalId string
 
 param logAnalyticsWorkspace object
 param serviceBus object
+param openaiAccount object
+param openaiProject object
 
 module modLogAnalyticsWorkspace './modules/logAnalyticsWorkspace.bicep' = {
   name: 'logAnalyticsWorkspace'
@@ -17,6 +20,30 @@ module modServicebus './modules/serviceBus.bicep' = {
   params: {
     servicebusName: '${serviceBus.name}-${environment}'
     location: location
+  }
+}
+
+module modOpenaiAccount 'modules/openai-account.bicep' = if(openaiAccount.deployOnEnvironment == environment) {
+  name: 'modOpenaiAccount'
+  params: {
+    location: location
+    foundryResourceName: '${openaiAccount.name}'
+    accountRoleAssignments: openaiAccount.accountRoleAssignments
+    logAnalyticsWorkspaceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
+    administratorPrincipalId: administratorPrincipalId
+  }
+}
+
+
+module modAiProjectAndDeployments 'modules/openai-project-and-deployments.bicep' = if(openaiAccount.deployOnEnvironment == environment) {
+  name: 'modAiProject'
+  params: {
+    accountName: modOpenaiAccount.?outputs.resourceName ?? 'not possible'
+    projectName: openaiProject.name
+    projectDescription: openaiProject.description
+    deployments: openaiProject.deployments
+    roleAssignmentsTemplate: openaiProject.roleAssignmentsTemplate
+    administratorPrincipalId: administratorPrincipalId
   }
 }
 

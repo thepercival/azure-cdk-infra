@@ -1,16 +1,85 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
-  "contentVersion": "1.0.0.0",
-  "parameters": {
-    "logAnalyticsWorkspace": {
-        "value": {
-            "name": "lw-core"
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "logAnalyticsWorkspace": {
+            "value": {
+                "name": "lw-core"
+            }
+        },
+        "serviceBus": {
+            "value": {
+                "name": "sb-cdk"
+            }
+        },
+        "openaiAccount": {
+            "value": {
+                "name": "aoai-cdk",
+                "deployOnEnvironment": "dev",
+                "accountRoleAssignments": [
+                    {
+                        "principalName": "cdkdev",
+                        "principalType": "User",
+                        "roleName": "Cognitive Services Contributor",
+                        "roleDefinitionId": "25fbc0a9-bd7c-42a3-aa1a-3b75d497ee68"
+                    },
+                    {
+                        "principalName": "cdkdev",
+                        "principalType": "User",
+                        "roleName": "Cognitive Services User",
+                        "roleDefinitionId": "a97b65f3-24c7-4388-baec-2e87135dc908"
+                    }
+                ]
+            }
+        },
+        "openaiProject": {
+            "value": {
+                "name": "Enhance Dev Ops with AI",
+                "description": "Enhance Dev Ops with AI - Project",
+                "roleAssignments": [
+                    {
+                        "roleName": "Cognitive Services OpenAI User",
+                        "usersDescription": "Application managed identities, developers, end users",
+                        "roleDefinitionId": "5e0bd9bd-7b93-4f28-af87-19fc36ad61bd"
+                    },
+                    {
+                        "roleName": "Cognitive Services OpenAI Contributor",
+                        "usersDescription": "AI engineers, ML engineers, project admins",
+                        "roleDefinitionId": "a001fd3d-188f-4b5d-821b-7da978bf7442"
+                    }
+                ],
+                "deployments": [
+                    {
+                        "deploymentName": "phi4-mini-chat",
+                        "modelName": "Phi-4-mini-instruct",
+                        "modelVersion": "1",
+                        "modelFormat": "Microsoft",
+                        "capacity": 1
+                    },
+                    {
+                        "deploymentName": "codestral-2501-code-editing",
+                        "modelName": "Codestral-2501",
+                        "modelVersion": "2",
+                        "modelFormat": "Mistral AI",
+                        "capacity": 1
+                    }
+                ]
+            }
+        },
+        "dashboard": {
+            "value": {
+                "name": "dashboard-foundry-costs"
+            }
+        },
+        "budget": {
+            "value": {
+                "name": "budget-dev-foundry",
+                "amount": 250,
+                "contactEmails": [
+                    "cdkdev@pm.me"
+                ],
+                "startDate": "2026-07-01"
+            }
         }
-    },
-    "serviceBus": {
-      "value": {
-        "name": "sb-cdk"
-      }
     }
-  }
 }

@@ -20,6 +20,8 @@ on:
         required: true
       AZURE_SUBSCRIPTION_ID:
         required: true
+      ENTRA_ADMINPRINCIPAL_ID:
+        required: true        
 
 jobs:
   deploy:
@@ -52,4 +54,5 @@ jobs:
             --resource-group ${{ inputs.resource-group }} \
             --template-file infra/main.bicep \
             --parameters @infra/parameters/parameters.json \
-            --parameters environment=${{ inputs.environment }}
+            --parameters environment=${{ inputs.environment }} \
+            --parameters administratorPrincipalId=${{ secrets.ENTRA_ADMINPRINCIPAL_ID }}
