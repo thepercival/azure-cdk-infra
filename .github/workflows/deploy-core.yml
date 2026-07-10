@@ -14,6 +14,9 @@ jobs:
   deploy-dev:
     if: github.event_name == 'push'
     uses: ./.github/workflows/reusable-deploy.yml
+    permissions:
+      id-token: write
+      contents: read
     with:
       environment: dev
       resource-group: rg-core-dev
@@ -22,6 +25,9 @@ jobs:
   deploy-acc:
     if: github.event.pull_request.merged == true
     uses: ./.github/workflows/reusable-deploy.yml
+    permissions:
+      id-token: write
+      contents: read
     with:
       environment: acc
       resource-group: rg-core-acc
@@ -30,6 +36,9 @@ jobs:
   deploy-prd:
     needs: deploy-acc
     uses: ./.github/workflows/reusable-deploy.yml
+    permissions:
+      id-token: write
+      contents: read
     with:
       environment: prd
       resource-group: rg-core-prd
