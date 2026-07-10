@@ -2,18 +2,9 @@ param accountName string
 param projectName string
 param projectDescription string
 param deployments array
-param roleAssignmentsTemplate array
+param roleAssignmentTemplates array
 @secure()
 param administratorPrincipalId string
-
-// Expand role assignments for this user
-var roleAssignments = [for roleAssignmentTemplate in roleAssignmentsTemplate: {
-  principalName: roleAssignmentTemplate.principalName
-  principalId: administratorPrincipalId
-  principalType: roleAssignmentTemplate.principalType
-  roleName: roleAssignmentTemplate.roleName
-  roleDefinitionId: roleAssignmentTemplate.roleDefinitionId
-}]
 
 resource foundryAccount 'Microsoft.CognitiveServices/accounts@2026-03-01' existing = {
   name: accountName
@@ -49,14 +40,14 @@ resource resAiProject 'Microsoft.CognitiveServices/accounts/projects@2026-03-01'
 // }]
 
 // Role assignments at project level
-resource projectRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for assignment in roleAssignments: {
+resource projectRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for assignment in roleAssignmentTemplates: {
   name: guid(resAiProject.id, assignment.principalId, assignment.roleDefinitionId)
   scope: resAiProject
   properties: {
-    principalId: assignment.principalId
+    principalId: administratorPrincipalId
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', assignment.roleDefinitionId)
     principalType: assignment.principalType
   }
 }]
 
-output deploymentNames array = [for deployment in deployments: deployment.deploymentName]
+output deploymentNames array = deployments // [for deployment in deployments: deployment.deploymentName]

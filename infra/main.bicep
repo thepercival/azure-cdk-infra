@@ -44,7 +44,7 @@ module modAiProjectAndDeployments 'modules/openai-project-and-deployments.bicep'
     projectName: openaiProject.name
     projectDescription: openaiProject.description
     deployments: openaiProject.deployments
-    roleAssignmentsTemplate: openaiProject.roleAssignmentsTemplate
+    roleAssignmentTemplates: openaiProject.roleAssignmentTemplates
     administratorPrincipalId: administratorPrincipalId
   }
 }
