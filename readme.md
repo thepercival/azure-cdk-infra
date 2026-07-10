@@ -17,7 +17,7 @@ Each job: creates the resource group if it does not exist → deploys the compon
 ```mermaid
 graph TB
     subgraph CI ["GitHub Actions"]
-        WF["deploy-servicebus.yml"]
+        WF["deploy-serviceBus.yml"]
     end
 
     subgraph AZ ["Azure Tenant"]
@@ -45,7 +45,7 @@ graph TB
 
 ## Components
 
-### Service Bus (`infra/servicebus/`)
+### Service Bus (`infra/serviceBus/`)
 
 Azure Service Bus namespace per environment — **Standard tier** (pay-per-use / per operation pricing).
 

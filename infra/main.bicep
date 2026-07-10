@@ -1,14 +1,28 @@
 param location string = resourceGroup().location
-param environmentName string
+param environment string
 
-module serviceBus './servicebus.bicep' = {
-  name: 'servicebus'
+param logAnalyticsWorkspace object
+param serviceBus object
+
+module modLogAnalyticsWorkspace './modules/logAnalyticsWorkspace.bicep' = {
+  name: 'logAnalyticsWorkspace'
   params: {
-    serviceBusName: 'sb-cdk-${environmentName}'
+    logAnalyticsWorkspaceName: '${logAnalyticsWorkspace.name}-${environment}'
     location: location
   }
 }
 
-output serviceBusNamespaceName string = serviceBus.outputs.serviceBusNamespaceName
-output serviceBusEndpoint string = serviceBus.outputs.serviceBusEndpoint
-output serviceBusHostname string = serviceBus.outputs.serviceBusHostname
+module modServicebus './modules/serviceBus.bicep' = {
+  name: 'serviceBus'
+  params: {
+    servicebusName: '${serviceBus.name}-${environment}'
+    location: location
+  }
+}
+
+output logAnalyticsWorkspaceId string = modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
+output logAnalyticsWorkspaceName string = modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceName
+
+output serviceBusNamespaceName string = modServicebus.outputs.serviceBusNamespaceName
+output serviceBusEndpoint string = modServicebus.outputs.serviceBusEndpoint
+output serviceBusHostname string = modServicebus.outputs.serviceBusHostname

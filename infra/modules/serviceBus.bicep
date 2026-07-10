@@ -1,8 +1,8 @@
 param location string
-param serviceBusName string
+param servicebusName string
 
-resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2026-01-01' = {
-  name: serviceBusName
+resource serviceBusNamespace 'Microsoft.serviceBus/namespaces@2026-01-01' = {
+  name: servicebusName
   location: location
   sku: {
     name: 'Standard'
@@ -14,6 +14,6 @@ resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2026-01-01' = {
   }
 }
 
-output serviceBusNamespaceName string = serviceBusName
+output serviceBusNamespaceName string = servicebusName
 output serviceBusEndpoint string = serviceBusNamespace.properties.serviceBusEndpoint
-output serviceBusHostname string = '${serviceBusName}.servicebus.windows.net'
+output serviceBusHostname string = '${servicebusName}.serviceBus.windows.net'
