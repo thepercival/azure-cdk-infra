@@ -55,7 +55,7 @@ resource foundryResource 'Microsoft.CognitiveServices/accounts@2026-03-01' = {
 
 // Role assignments at account level (for account-wide management permissions)
 resource foundryRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for assignment in accountRoleAssignments: {
-  name: guid(foundryResource.id, assignment.principalId, assignment.roleDefinitionId)
+  name: guid(foundryResource.id, administratorPrincipalId, assignment.roleDefinitionId)
   scope: foundryResource
   properties: {
     principalId: administratorPrincipalId
