@@ -9,7 +9,7 @@
     },
     "serviceBus": {
       "value": {
-        "name": "sb-core"
+        "name": "sb-cdk"
       }
     }
   }
