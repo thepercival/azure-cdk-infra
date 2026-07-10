@@ -54,15 +54,15 @@ resource foundryResource 'Microsoft.CognitiveServices/accounts@2026-03-01' = {
 // }]
 
 // Role assignments at account level (for account-wide management permissions)
-resource foundryRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for assignment in accountRoleAssignments: {
-  name: guid(foundryResource.id, administratorPrincipalId, assignment.roleDefinitionId)
-  scope: foundryResource
-  properties: {
-    principalId: administratorPrincipalId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', assignment.roleDefinitionId)
-    principalType: assignment.principalType
-  }
-}]
+// resource foundryRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for assignment in accountRoleAssignments: {
+//   name: guid(foundryResource.id, administratorPrincipalId, assignment.roleDefinitionId)
+//   scope: foundryResource
+//   properties: {
+//     principalId: administratorPrincipalId
+//     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', assignment.roleDefinitionId)
+//     principalType: assignment.principalType
+//   }
+// }]
 
 // Diagnostic settings for Application Insights integration
 resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = if (!empty(logAnalyticsWorkspaceId)) {

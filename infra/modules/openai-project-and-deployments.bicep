@@ -40,14 +40,14 @@ resource resAiProject 'Microsoft.CognitiveServices/accounts/projects@2026-03-01'
 // }]
 
 // Role assignments at project level
-resource projectRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for assignment in roleAssignmentTemplates: {
-  name: guid(resAiProject.id, assignment.principalId, assignment.roleDefinitionId)
-  scope: resAiProject
-  properties: {
-    principalId: administratorPrincipalId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', assignment.roleDefinitionId)
-    principalType: assignment.principalType
-  }
-}]
+// resource projectRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for assignment in roleAssignmentTemplates: {
+//   name: guid(resAiProject.id, administratorPrincipalId, assignment.roleDefinitionId)
+//   scope: resAiProject
+//   properties: {
+//     principalId: administratorPrincipalId
+//     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', assignment.roleDefinitionId)
+//     principalType: assignment.principalType
+//   }
+// }]
 
 output deploymentNames array = deployments // [for deployment in deployments: deployment.deploymentName]
