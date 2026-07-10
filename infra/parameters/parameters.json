@@ -74,7 +74,7 @@
         "budget": {
             "value": {
                 "name": "budget-dev-foundry",
-                "amount": 250,
+                "amount": 50,
                 "contactEmails": [
                     "cdkdev@pm.me"
                 ],
