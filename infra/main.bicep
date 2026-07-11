@@ -1,5 +1,6 @@
 param location string = resourceGroup().location
 param environment string
+@secure()
 param administratorPrincipalId string
 
 param logAnalyticsWorkspace object
@@ -25,50 +26,16 @@ module modServicebus './modules/serviceBus.bicep' = {
   }
 }
 
-module modOpenaiAccount 'modules/openai-account.bicep' = if(openaiAccount.deployOnEnvironment == environment) {
-  name: 'modOpenaiAccount'
+module modOpenai 'modules/openai.bicep' = if(openaiAccount.deployOnEnvironment == environment) {
+  name: 'modOpenai'
   params: {
     location: location
-    foundryResourceName: openaiAccount.name
-    accountRoleAssignments: openaiAccount.roleAssignments
     logAnalyticsWorkspaceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
-    administratorPrincipalId: administratorPrincipalId
-  }
-}
-
-
-module modAiProjectAndDeployments 'modules/openai-project-and-deployments.bicep' = if(openaiAccount.deployOnEnvironment == environment) {
-  name: 'modAiProject'
-  params: {
-    accountName: modOpenaiAccount.outputs.resourceName
-    projectName: openaiProject.name
-    projectDescription: openaiProject.description
-    deployments: openaiProject.deployments
-    projectRoleAssignments: openaiProject.roleAssignments
-    administratorPrincipalId: administratorPrincipalId
-  }
-}
-
-// Deploy monitoring dashboard for token usage and costs
-module modDashboardOpenaiCosts 'modules/dashboard-openai-costs.bicep' = if( openaiAccount.deployOnEnvironment == environment) {
-  name: 'modDashboardOpenaiCosts'
-  params: {
-    dashboardName: dashboard.name
-    location: location
-    logAnalyticsWorkspaceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
-    aiServicesAccountName: openaiAccount.name
-    administratorPrincipalId: administratorPrincipalId
-  }
-}
-
-// Deploy budget alert for resource group
-module modBudget 'modules/budget.bicep' = if( openaiAccount.deployOnEnvironment == environment) {
-  name: 'budget-foundry-dev'
-  params: {
-    budgetName: '${budget.name}'
-    amount: budget.amount
-    contactEmails: budget.contactEmails
-    startDate: budget.startDate
+    openaiAccount: openaiAccount
+    openaiProject: openaiProject
+    dashboard: dashboard
+    budget: budget
+    administratorPrincipalId: administratorPrincipalId  
   }
 }
 

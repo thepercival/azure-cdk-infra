@@ -6,7 +6,7 @@ param logAnalyticsWorkspaceId string
 @secure()
 param administratorPrincipalId string
 
-resource foundryResource 'Microsoft.CognitiveServices/accounts@2026-03-01' = {
+resource resOpenaiAccount 'Microsoft.CognitiveServices/accounts@2026-03-01' = {
   name: foundryResourceName
   location: location
   kind: 'AIServices'
@@ -67,7 +67,7 @@ resource foundryResource 'Microsoft.CognitiveServices/accounts@2026-03-01' = {
 // Diagnostic settings for Application Insights integration
 resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = if (!empty(logAnalyticsWorkspaceId)) {
   name: 'send-to-log-analytics'
-  scope: foundryResource
+  scope: resOpenaiAccount
   properties: {
     workspaceId: logAnalyticsWorkspaceId
     logs: [
@@ -93,10 +93,10 @@ resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-pr
   }
 }
 
-output endpoint string = foundryResource.properties.endpoint
+output endpoint string = resOpenaiAccount.properties.endpoint
 output resourceName string = foundryResourceName
-output resourceId string = foundryResource.id
-output principalId string = foundryResource.identity.principalId
+output resourceId string = resOpenaiAccount.id
+output principalId string = resOpenaiAccount.identity.principalId
 output accountRoleAssignments array = accountRoleAssignments // [for assignment in accountRoleAssignments: assignment.roleDefinitionId]
 // output projects array = [for (project, i) in projects: {
 //   name: aiProjects[i].name
