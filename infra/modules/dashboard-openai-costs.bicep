@@ -668,15 +668,15 @@ resource resDashboard 'Microsoft.Portal/dashboards@2020-09-01-preview' = {
 }
 
 // Assign dashboard ownership to specified user
-resource dashboardRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(resDashboard.id, administratorPrincipalId, 'Owner')
-  scope: resDashboard
-  properties: {
-    principalId: administratorPrincipalId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635') // Owner role
-    principalType: 'User'
-  }
-}
+// resource dashboardRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+//   name: guid(resDashboard.id, administratorPrincipalId, 'Owner')
+//   scope: resDashboard
+//   properties: {
+//     principalId: administratorPrincipalId
+//     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635') // Owner role
+//     principalType: 'User'
+//   }
+// }
 
 // Assign Reader role to all users for dashboard viewing
 // resource dashboardReaderRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for user in users: {
