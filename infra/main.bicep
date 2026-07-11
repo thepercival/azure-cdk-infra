@@ -40,7 +40,7 @@ module modOpenaiAccount 'modules/openai-account.bicep' = if(openaiAccount.deploy
 module modAiProjectAndDeployments 'modules/openai-project-and-deployments.bicep' = if(openaiAccount.deployOnEnvironment == environment) {
   name: 'modAiProject'
   params: {
-    accountName: modOpenaiAccount.?outputs.resourceName ?? 'not possible'
+    accountName: modOpenaiAccount.outputs.resourceName
     projectName: openaiProject.name
     projectDescription: openaiProject.description
     deployments: openaiProject.deployments
@@ -54,7 +54,7 @@ module modDashboardOpenaiCosts 'modules/dashboard-openai-costs.bicep' = if( open
   name: 'modDashboardOpenaiCosts'
   params: {
     dashboardName: dashboard.name
-    location: dashboard.location
+    location: location
     logAnalyticsWorkspaceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
     aiServicesAccountName: openaiAccount.name
     administratorPrincipalId: administratorPrincipalId

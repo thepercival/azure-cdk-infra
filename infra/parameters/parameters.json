@@ -34,7 +34,7 @@
         },
         "openaiProject": {
             "value": {
-                "name": "Enhance Dev Ops with AI",
+                "name": "CDK_Dev_AI_Project",
                 "description": "Enhance Dev Ops with AI - Project",
                 "roleAssignments": [
                     {
