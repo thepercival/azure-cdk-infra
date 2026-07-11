@@ -58,4 +58,37 @@ az role assignment create \
 
 > The resource group does not need to exist before running this — the workflow creates it automatically. Assign at subscription scope to cover all three resource groups at once.
 
+---
+
+### 5. Grant the CI/CD Principal Permission to Create Role Assignments
+
+To allow the pipeline to automate role assignments via Bicep, the service principal also needs the **Role Based Access Control Administrator** role. This is separate from `Contributor` — `Contributor` alone cannot create role assignments.
+
+```bash
+az role assignment create \
+  --assignee <AZURE_CLIENT_ID> \
+  --role "Role Based Access Control Administrator" \
+  --scope /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-core-dev
+```
+
+Repeat for `rg-core-acc` and `rg-core-prd`, or assign at subscription scope to cover all three at once:
+
+```bash
+az role assignment create \
+  --assignee <AZURE_CLIENT_ID> \
+  --role "Role Based Access Control Administrator" \
+  --scope /subscriptions/<SUBSCRIPTION_ID>
+```
+
+> **Recommended:** add a condition to restrict which roles the principal is allowed to assign, preventing privilege escalation. Replace the GUIDs with the role definition IDs your Bicep actually assigns:
+>
+> ```bash
+> az role assignment create \
+>   --assignee <AZURE_CLIENT_ID> \
+>   --role "Role Based Access Control Administrator" \
+>   --scope /subscriptions/<SUBSCRIPTION_ID> \
+>   --condition "((!(ActionMatches{'Microsoft.Authorization/roleAssignments/write'})) OR (@Request[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAnyValues:GuidEquals {<ROLE_DEFINITION_ID_1>, <ROLE_DEFINITION_ID_2>}))" \
+>   --condition-version "2.0"
+> ```
+
 

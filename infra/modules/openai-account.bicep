@@ -23,46 +23,16 @@ resource resOpenaiAccount 'Microsoft.CognitiveServices/accounts@2026-03-01' = {
   }
 }
 
-// resource aiProjects 'Microsoft.CognitiveServices/accounts/projects@2026-03-01' = [for project in projects: {
-//   parent: foundryResource
-//   name: project.name
-//   location: location
-//   identity: {
-//     type: 'SystemAssigned'
-//   }
-//   properties: {
-//     displayName: project.displayName
-//     description: project.description
-//   }
-// }]
-
-// // Deploy models to each project using child module
-// // Process 1 project at a time for sequential deployment
-// @batchSize(1)
-// module projectDeployments 'openai-project-deployments.bicep' = [for (project, i) in projects: {
-//   name: 'deployments-${project.name}'
-//   params: {
-//     accountName: foundryResource.name
-//     projectName: aiProjects[i].name
-//     user: project.user
-//     deploymentsTemplate: project.deploymentsTemplate
-//     roleAssignmentsTemplate: project.roleAssignmentsTemplate
-//   }
-//   dependsOn: [
-//     aiProjects[i]
-//   ]
-// }]
-
 // Role assignments at account level (for account-wide management permissions)
-// resource foundryRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for assignment in accountRoleAssignments: {
-//   name: guid(foundryResource.id, administratorPrincipalId, assignment.roleDefinitionId)
-//   scope: foundryResource
-//   properties: {
-//     principalId: administratorPrincipalId
-//     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', assignment.roleDefinitionId)
-//     principalType: assignment.principalType
-//   }
-// }]
+resource foundryRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for assignment in accountRoleAssignments: {
+  name: guid(resOpenaiAccount.id, administratorPrincipalId, assignment.roleDefinitionId)
+  scope: resOpenaiAccount
+  properties: {
+    principalId: administratorPrincipalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', assignment.roleDefinitionId)
+    principalType: assignment.principalType
+  }
+}]
 
 // Diagnostic settings for Application Insights integration
 resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = if (!empty(logAnalyticsWorkspaceId)) {
