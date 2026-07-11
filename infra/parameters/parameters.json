@@ -16,7 +16,7 @@
             "value": {
                 "name": "aoai-cdk",
                 "deployOnEnvironment": "dev",
-                "accountRoleAssignments": [
+                "roleAssignments": [
                     {
                         "principalName": "cdkdev",
                         "principalType": "User",

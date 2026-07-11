@@ -97,6 +97,7 @@ output endpoint string = foundryResource.properties.endpoint
 output resourceName string = foundryResourceName
 output resourceId string = foundryResource.id
 output principalId string = foundryResource.identity.principalId
+output accountRoleAssignments array = accountRoleAssignments // [for assignment in accountRoleAssignments: assignment.roleDefinitionId]
 // output projects array = [for (project, i) in projects: {
 //   name: aiProjects[i].name
 //   displayName: project.displayName

@@ -30,7 +30,7 @@ module modOpenaiAccount 'modules/openai-account.bicep' = if(openaiAccount.deploy
   params: {
     location: location
     foundryResourceName: openaiAccount.name
-    accountRoleAssignments: openaiAccount.accountRoleAssignments
+    accountRoleAssignments: openaiAccount.roleAssignments
     logAnalyticsWorkspaceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
     administratorPrincipalId: administratorPrincipalId
   }
@@ -44,7 +44,7 @@ module modAiProjectAndDeployments 'modules/openai-project-and-deployments.bicep'
     projectName: openaiProject.name
     projectDescription: openaiProject.description
     deployments: openaiProject.deployments
-    roleAssignmentTemplates: openaiProject.roleAssignmentTemplates
+    projectRoleAssignments: openaiProject.roleAssignments
     administratorPrincipalId: administratorPrincipalId
   }
 }

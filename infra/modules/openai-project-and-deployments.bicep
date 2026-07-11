@@ -2,7 +2,7 @@ param accountName string
 param projectName string
 param projectDescription string
 param deployments array
-param roleAssignmentTemplates array
+param projectRoleAssignments array
 @secure()
 param administratorPrincipalId string
 
@@ -40,14 +40,15 @@ resource resAiProject 'Microsoft.CognitiveServices/accounts/projects@2026-03-01'
 // }]
 
 // Role assignments at project level
-// resource projectRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for assignment in roleAssignmentTemplates: {
-//   name: guid(resAiProject.id, administratorPrincipalId, assignment.roleDefinitionId)
+// resource projectRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for projectRoleAssignment in projectRoleAssignments: {
+//   name: guid(resAiProject.id, administratorPrincipalId, projectRoleAssignment.roleDefinitionId)
 //   scope: resAiProject
 //   properties: {
 //     principalId: administratorPrincipalId
-//     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', assignment.roleDefinitionId)
-//     principalType: assignment.principalType
+//     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', projectRoleAssignment.roleDefinitionId)
+//     principalType: projectRoleAssignment.principalType
 //   }
 // }]
 
 output deploymentNames array = deployments // [for deployment in deployments: deployment.deploymentName]
+output projectRoleAssignments array = projectRoleAssignments // [for projectRoleAssignment in projectRoleAssignments: projectRoleAssignment.roleDefinitionId]
