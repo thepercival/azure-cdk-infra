@@ -52,3 +52,6 @@ module modBudget 'budget.bicep' = {
     startDate: budget.startDate
   }
 }
+
+output endpoint string = modOpenaiAccount.outputs.endpoint
+output accountName string = modOpenaiAccount.outputs.resourceName

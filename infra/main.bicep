@@ -9,6 +9,7 @@ param openaiAccount object
 param openaiProject object
 param budget object
 param dashboard object
+param apim object
 
 module modLogAnalyticsWorkspace './modules/logAnalyticsWorkspace.bicep' = {
   name: 'logAnalyticsWorkspace'
@@ -39,9 +40,28 @@ module modOpenai 'modules/openai.bicep' = if(openaiAccount.deployOnEnvironment =
   }
 }
 
+module modApim './modules/apim.bicep' = {
+  name: 'apim'
+  params: {
+    location: location
+    apimName: '${apim.name}-${environment}'
+    publisherEmail: apim.publisherEmail
+    publisherName: apim.publisherName
+    skuName: apim.sku[environment].name
+    skuCapacity: apim.sku[environment].capacity
+    // openaiEndpoint: modOpenai.outputs.endpoint
+    // openaiAccountName: openaiAccount.name
+    logAnalyticsWorkspaceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
+    // tokenLimitTpmPerSubscription: apim.tokenLimitTpmPerSubscription
+  }
+}
+
 output logAnalyticsWorkspaceId string = modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
 output logAnalyticsWorkspaceName string = modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceName
 
 output serviceBusNamespaceName string = modServicebus.outputs.serviceBusNamespaceName
 output serviceBusEndpoint string = modServicebus.outputs.serviceBusEndpoint
 output serviceBusHostname string = modServicebus.outputs.serviceBusHostname
+
+output apimGatewayUrl string = modApim.outputs.apimGatewayUrl
+output apimServiceId string = modApim.outputs.apimServiceId

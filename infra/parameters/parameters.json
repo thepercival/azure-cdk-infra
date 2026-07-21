@@ -80,6 +80,28 @@
                 ],
                 "startDate": "2026-07-01"
             }
+        },
+        "apim": {
+            "value": {
+                "name": "apim-cdk",
+                "publisherEmail": "cdkdev@pm.me",
+                "publisherName": "CDK Dev",
+                "sku": {
+                    "dev": {
+                        "name": "Developer",
+                        "capacity": 1
+                    },
+                    "acc": {
+                        "name": "?",
+                        "capacity": 1
+                    },
+                    "prd": {
+                        "name": "?",
+                        "capacity": 1
+                    }
+                },
+                "tokenLimitTpmPerSubscription": 10000
+            }
         }
     }
 }
