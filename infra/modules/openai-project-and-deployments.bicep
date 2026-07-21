@@ -5,6 +5,7 @@ param deployments array
 param projectRoleAssignments array
 @secure()
 param administratorPrincipalId string
+param administratorPrincipalType string = 'User'
 
 resource foundryAccount 'Microsoft.CognitiveServices/accounts@2026-03-01' existing = {
   name: accountName
@@ -46,7 +47,7 @@ resource resProjectRoleAssignments 'Microsoft.Authorization/roleAssignments@2022
   properties: {
     principalId: administratorPrincipalId
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', projectRoleAssignment.roleDefinitionId)
-    principalType: projectRoleAssignment.principalType
+    principalType: administratorPrincipalType
   }
 }]
 
