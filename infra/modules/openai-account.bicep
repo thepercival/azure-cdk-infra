@@ -11,7 +11,7 @@ resource resOpenaiAccount 'Microsoft.CognitiveServices/accounts@2026-03-01' = {
   location: location
   kind: 'AIServices'
   sku: {
-    name: 'S0'
+    name: 'S1'
   }
   identity: {
     type: 'SystemAssigned'

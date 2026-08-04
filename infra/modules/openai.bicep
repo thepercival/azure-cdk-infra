@@ -39,7 +39,6 @@ module modDashboardOpenaiCosts 'dashboard-openai-costs.bicep' = {
     location: location
     logAnalyticsWorkspaceId: logAnalyticsWorkspaceId
     aiServicesAccountName: openaiAccount.name
-    administratorPrincipalId: administratorPrincipalId
   }
 }
 

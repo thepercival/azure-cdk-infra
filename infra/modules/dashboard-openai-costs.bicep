@@ -4,7 +4,7 @@ param dashboardName string
 @description('Azure region location')
 param location string
 
-param administratorPrincipalId string
+// param administratorPrincipalId string
 
 @description('Log Analytics Workspace resource ID')
 param logAnalyticsWorkspaceId string
