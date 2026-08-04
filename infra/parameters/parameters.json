@@ -53,8 +53,8 @@
                    {
                         "deploymentName": "deepseek-v4-flash",
                         "modelName": "DeepSeek-V4-Flash",
-                        "modelVersion": "2026-04-23",
-                        "modelFormat": "Mistral AI",
+                        "modelVersion": "1",
+                        "modelFormat": "DeepSeek",
                         "capacity": 1
                     }
                 ]
