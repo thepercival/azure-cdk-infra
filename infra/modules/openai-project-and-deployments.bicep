@@ -1,6 +1,7 @@
 param accountName string
 param projectName string
 param projectDescription string
+param projectLocation string
 param deployments array
 param projectRoleAssignments array
 @secure()
@@ -14,7 +15,7 @@ resource foundryAccount 'Microsoft.CognitiveServices/accounts@2026-03-01' existi
 resource resAiProject 'Microsoft.CognitiveServices/accounts/projects@2026-03-01' = {
   parent: foundryAccount
   name: projectName
-  location: resourceGroup().location
+  location: projectLocation
   identity: {
     type: 'SystemAssigned'
   }
@@ -24,21 +25,21 @@ resource resAiProject 'Microsoft.CognitiveServices/accounts/projects@2026-03-01'
   }
 }
 
-// resource modelDeployments 'Microsoft.CognitiveServices/accounts/projects/deployments@2026-03-01' = [for deployment in deployments: {
-//   parent: resAiProject
-//   name: deployment.deploymentName
-//   sku: {
-//     name: 'GlobalStandard'
-//     capacity: deployment.capacity
-//   }
-//   properties: {
-//     model: {
-//       format: deployment.modelFormat
-//       name: deployment.modelName
-//       version: deployment.modelVersion
-//     }
-//   }
-// }]
+resource modelDeployments 'Microsoft.CognitiveServices/accounts/deployments@2026-03-01' = [for deployment in deployments: {
+  parent: foundryAccount
+  name: deployment.deploymentName
+  sku: {
+    name: 'GlobalStandard'
+    capacity: deployment.capacity
+  }
+  properties: {
+    model: {
+      format: deployment.modelFormat
+      name: deployment.modelName
+      version: deployment.modelVersion
+    }
+  }
+}]
 
 // Role assignments at project level
 resource resProjectRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for projectRoleAssignment in projectRoleAssignments: {

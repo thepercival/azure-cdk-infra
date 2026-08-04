@@ -34,8 +34,9 @@
         },
         "openaiProject": {
             "value": {
-                "name": "CDK_Dev_AI_Project",
-                "description": "Enhance Dev Ops with AI - Project",
+                "name": "CDK_Dev_AI_Project_V2",
+                "location": "norrtheurope",
+                "description": "Enhance Dev Ops with AI - Project V2",
                 "roleAssignments": [
                     {
                         "roleName": "Cognitive Services OpenAI User",
@@ -49,17 +50,10 @@
                     }
                 ],
                 "deployments": [
-                    {
-                        "deploymentName": "phi4-mini-chat",
-                        "modelName": "Phi-4-mini-instruct",
-                        "modelVersion": "1",
-                        "modelFormat": "Microsoft",
-                        "capacity": 1
-                    },
-                    {
-                        "deploymentName": "codestral-2501-code-editing",
-                        "modelName": "Codestral-2501",
-                        "modelVersion": "2",
+                   {
+                        "deploymentName": "deepseek-v4-flash",
+                        "modelName": "DeepSeek-V4-Flash",
+                        "modelVersion": "2026-04-23",
                         "modelFormat": "Mistral AI",
                         "capacity": 1
                     }

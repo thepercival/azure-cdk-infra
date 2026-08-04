@@ -68,9 +68,3 @@ output resourceName string = foundryResourceName
 output resourceId string = resOpenaiAccount.id
 output principalId string = resOpenaiAccount.identity.principalId
 output accountRoleAssignments array = accountRoleAssignments // [for assignment in accountRoleAssignments: assignment.roleDefinitionId]
-// output projects array = [for (project, i) in projects: {
-//   name: aiProjects[i].name
-//   displayName: project.displayName
-//   endpoint: '${foundryResource.properties.endpoint}projects/${aiProjects[i].name}/'
-//   deployments: projectDeployments[i].outputs.deploymentNames
-// }]

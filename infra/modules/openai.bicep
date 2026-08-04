@@ -24,6 +24,7 @@ module modAiProjectAndDeployments 'openai-project-and-deployments.bicep' = {
     accountName: modOpenaiAccount.outputs.resourceName
     projectName: openaiProject.name
     projectDescription: openaiProject.description
+    projectLocation: openaiProject.location
     deployments: openaiProject.deployments
     projectRoleAssignments: openaiProject.roleAssignments
     administratorPrincipalId: administratorPrincipalId
