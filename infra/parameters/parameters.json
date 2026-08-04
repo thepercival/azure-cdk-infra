@@ -35,7 +35,7 @@
         "openaiProject": {
             "value": {
                 "name": "CDK_Dev_AI_Project_V2",
-                "location": "norrtheurope",
+                "location": "northeurope",
                 "description": "Enhance Dev Ops with AI - Project V2",
                 "roleAssignments": [
                     {
