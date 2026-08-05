@@ -6,6 +6,7 @@ param administratorPrincipalId string
 param logAnalyticsWorkspace object
 param serviceBus object
 param openaiAccount object
+param openaiDeployments array
 param openaiProject object
 param budget object
 param dashboard object
@@ -34,6 +35,7 @@ module modOpenai 'modules/openai.bicep' = if(openaiAccount.deployOnEnvironment =
     logAnalyticsWorkspaceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
     openaiAccount: openaiAccount
     openaiProject: openaiProject
+    openaiDeployments: openaiDeployments
     dashboard: dashboard
     budget: budget
     administratorPrincipalId: administratorPrincipalId  

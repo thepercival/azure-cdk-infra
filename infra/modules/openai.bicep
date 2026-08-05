@@ -2,6 +2,7 @@ param location string
 param logAnalyticsWorkspaceId string
 param openaiAccount object
 param openaiProject object
+param openaiDeployments array
 param dashboard object
 param budget object
 @secure()
@@ -19,19 +20,25 @@ module modOpenaiAccount 'openai-account.bicep' = {
   }
 }
 
-module modAiProjectAndDeployments 'openai-project-and-deployments.bicep' = {
+
+module modAiModelDeployments 'openai-modeldeployments.bicep' = {
+  name: 'modAiModelDeployments'
+  params: {
+    accountName: modOpenaiAccount.outputs.resourceName
+    deployments: openaiDeployments
+  }
+}
+
+module modAiProjects 'openai-project.bicep' = {
   name: 'modAiProject'
   params: {
     accountName: modOpenaiAccount.outputs.resourceName
     projectName: openaiProject.name
     projectDescription: openaiProject.description
     projectLocation: location
-    deployments: openaiProject.deployments
-    projectRoleAssignments: openaiProject.roleAssignments
-    administratorPrincipalId: administratorPrincipalId
+    projectRoleAssignments: openaiProject.roleAssignments    
   }
 }
-
 // Deploy monitoring dashboard for token usage and costs
 module modDashboardOpenaiCosts 'dashboard-openai-costs.bicep' = {
   name: 'modDashboardOpenaiCosts'
