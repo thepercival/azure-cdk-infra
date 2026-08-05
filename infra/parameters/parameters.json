@@ -35,32 +35,34 @@
                 ]
             }
         },
-        "openaiDeployments": [
-            {
-                "deploymentName": "gpt-5-mini",
-                "modelName": "gpt-5-mini",
-                "modelVersion": "2025-08-07",
-                "modelFormat": "OpenAI",
-                "skuName": "GlobalStandard",
-                "capacity": 10,
-                "roleAssignments": []
-            },
-            {
-                "deploymentName": "Codestral-2501",
-                "modelName": "Codestral-2501",
-                "modelVersion": "2",
-                "modelFormat": "Mistral AI",
-                "skuName": "GlobalStandard",
-                "capacity": 10,
-                "roleAssignments": []
-            }
-        ],
+        "openaiDeployments": {
+            "value": [
+                {
+                    "deploymentName": "gpt-5-mini",
+                    "modelName": "gpt-5-mini",
+                    "modelVersion": "2025-08-07",
+                    "modelFormat": "OpenAI",
+                    "skuName": "GlobalStandard",
+                    "capacity": 10,
+                    "roleAssignments": []
+                },
+                {
+                    "deploymentName": "Codestral-2501",
+                    "modelName": "Codestral-2501",
+                    "modelVersion": "2",
+                    "modelFormat": "Mistral AI",
+                    "skuName": "GlobalStandard",
+                    "capacity": 10,
+                    "roleAssignments": []
+                }
+            ]
+        },
         "openaiProject": {
             "value": {
                 "name": "CDK_Dev_AI_Project",
                 "description": "Enhance Dev Ops with AI - Project",
                 "roleAssignments": [
-                    {   
+                    {
                         "projectPrincipalId": null,
                         "projectPrincipalType": "ServicePrincipal",
                         "roleName": "Cognitive Services OpenAI User",
