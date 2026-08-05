@@ -171,6 +171,57 @@ Azure Service Bus namespace per environment — **Standard tier** (pay-per-use /
 | `serviceBusEndpoint` | Full HTTPS endpoint URL |
 | `serviceBusHostname` | Hostname for SDK connections |
 
+## Account, Project en Rollen
+
+Model deployments hangen **altijd aan het account** — niet aan een project. Een project is een logische toegangslaag: het bepaalt via RBAC wie de deployments onder dat account mag gebruiken.
+
+```mermaid
+graph TB
+    subgraph Account["🏦 AI Services Account — aoai-cdk\n(Microsoft.CognitiveServices/accounts)"]
+
+        subgraph AccountRoles["RBAC op account-niveau\n(beheerdersrechten)"]
+            AR1["Cognitive Services Contributor\n→ cdkdev\n📋 quota, deployments aanmaken/verwijderen"]
+            AR2["Cognitive Services User\n→ cdkdev\n🔑 account-brede API-toegang"]
+        end
+
+        subgraph Deployments["Model Deployments\n(parent = account)"]
+            D1["phi4-mini-chat\nPhi-4-mini-instruct · GlobalStandard · 1K TPM"]
+            D2["codestral-2501-code-editing\nCodestral-2501 · GlobalStandard · 1K TPM"]
+        end
+
+        subgraph Project["📁 Project — CDK_Dev_AI_Project\n(Microsoft.CognitiveServices/accounts/projects)"]
+
+            subgraph ProjectRoles["RBAC op project-niveau\n(gebruikersrechten)"]
+                PR1["Cognitive Services OpenAI User\n→ App managed identities, developers\n💬 modellen aanroepen via project-endpoint"]
+                PR2["Cognitive Services OpenAI Contributor\n→ AI engineers, ML engineers, project admins\n⚙️ project beheren + modellen aanroepen"]
+            end
+
+        end
+    end
+
+    ProjectRoles -->|"heeft toegang tot deployments\nvia project-endpoint"| Deployments
+    AccountRoles -->|"beheert het account\nen zijn deployments"| Deployments
+```
+
+### Waarom deze scheiding?
+
+| Vraag | Antwoord |
+|---|---|
+| Wie mag deployments aanmaken/verwijderen? | Rollen op **account**-niveau (`Cognitive Services Contributor`) |
+| Wie mag modellen aanroepen (applicaties, developers)? | Rollen op **project**-niveau (`Cognitive Services OpenAI User`) |
+| Kan een project een deployment verbergen? | Nee — alle deployments onder het account zijn zichtbaar voor iedereen met project-toegang |
+| Kan je meerdere projecten maken met elk andere RBAC? | Ja — één account, meerdere projecten, elk met eigen rollenset |
+
+### Bicep resource-hiërarchie
+
+```
+Microsoft.CognitiveServices/accounts          (aoai-cdk)
+├── /deployments                              (phi4-mini-chat)          ← parent: account
+├── /deployments                              (codestral-2501-...)       ← parent: account
+└── /projects                                 (CDK_Dev_AI_Project)      ← parent: account
+    └── Microsoft.Authorization/roleAssignments  (OpenAI User, OpenAI Contributor)
+```
+
 ## AI Gateway via APIM
 
 Azure API Management fungeert als **AI Gateway**: één enkel inkomstpunt tussen jouw applicaties en de AI Foundry-modellen. In plaats van elke applicatie direct met de Foundry te laten praten, loopt al het verkeer via APIM — inclusief authenticatie, rate limiting en observability.
