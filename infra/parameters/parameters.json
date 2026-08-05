@@ -53,20 +53,20 @@
                 ],
                 "deployments": [
                     {
-                        "deploymentName": "phi4-mini-chat",
-                        "modelName": "Phi-4-mini-instruct",
-                        "modelVersion": "1",
-                        "modelFormat": "Microsoft",
+                        "deploymentName": "gpt-5-mini",
+                        "modelName": "gpt-5-mini",
+                        "modelVersion": "2025-08-07",
+                        "modelFormat": "OpenAI",
                         "skuName": "GlobalStandard",
-                        "capacity": 1
+                        "capacity": 10
                     },
                     {
-                        "deploymentName": "codestral-2501-code-editing",
+                        "deploymentName": "Codestral-2501",
                         "modelName": "Codestral-2501",
                         "modelVersion": "2",
                         "modelFormat": "Mistral AI",
                         "skuName": "GlobalStandard",
-                        "capacity": 1
+                        "capacity": 10
                     }
                 ]
             }

@@ -98,20 +98,20 @@ graph TD
 
 ### Catalog — deployable models per publisher (westeurope, 2026-08-05)
 
-| Publisher | Model | Deploy type |
-|---|---|---|
-| **Anthropic** | `claude-opus-5`, `claude-sonnet-5`, `claude-mythos-5`, `claude-fable-5`, `claude-opus-4-8/7/6/5/1`, `claude-sonnet-4-6/5`, `claude-haiku-4-5` | Serverless |
-| **Black Forest Labs** | `Flux.1-Kontext-pro`, `Flux-1.1-Pro` | Serverless |
-| **Cohere** | `Cohere-command-a-plus-05-2026`, `Cohere-rerank-v4.0-pro/fast`, `embed-v-4-0`, `cohere-command-a`, `Cohere-embed-v3-multilingual` | Serverless |
-| **DeepSeek** | `DeepSeek-V4-Pro`, `DeepSeek-V4-Flash`, `DeepSeek-V3.2`, `DeepSeek-V3.2-Speciale`, `DeepSeek-V3.1`, `DeepSeek-V3-0324`, `DeepSeek-R1-0528`, `DeepSeek-R1` | Serverless |
-| **Meta** | `Llama-4-Maverick-17B-128E-Instruct-FP8`, `Llama-4-Scout-17B-16E-Instruct`, `Llama-3.3-70B-Instruct` | Serverless |
-| **Microsoft** | `Phi-4`, `Phi-4-mini-instruct`, `Phi-4-mini-reasoning`, `Phi-4-multimodal-instruct`, `Phi-4-reasoning`, `MAI-Image-2.5`, `MAI-Image-2.5-Flash`, `MAI-Image-2e`, `MAI-Voice-1/2`, `MAI-Transcribe-1/1.5`, `model-router` | Serverless |
-| **Mistral AI** | `Mistral-Large-3`, `mistral-medium-2505`, `mistral-small-2503`, `Ministral-3B`, `mistral-document-ai-2512/2505` | Serverless |
-| **Moonshot AI** | `Kimi-K2.7-Code`, `Kimi-K2.6`, `Kimi-K2.5` | Serverless |
-| **OpenAI** | `gpt-5.6-sol/luna/terra`, `gpt-5.5`, `gpt-5.4/mini/nano/pro`, `gpt-5.3-chat/codex`, `gpt-5.2/chat/codex`, `gpt-5.1/chat/codex/codex-mini/codex-max`, `gpt-5/mini/nano/pro/chat/codex`, `gpt-4.1/mini/nano`, `gpt-4o/mini`, `o1`, `o3/mini/pro`, `o4-mini`, `codex-mini`, `sora-2`, `gpt-image-2`, `gpt-audio/1.5`, `gpt-realtime/2/2.1` | OpenAI |
-| **StabilityAI** | `Stable-Diffusion-3.5-Large`, `Stable-Image-Ultra`, `Stable-Image-Core` | Serverless |
-| **xAI** | `grok-4`, `grok-4.3`, `grok-4-20-reasoning/non-reasoning`, `grok-4-1-fast-reasoning/non-reasoning`, `grok-code-fast-1` | Serverless |
-| **Hugging Face** | `zai-org--glm-5.2-fp8`, `qwen--qwen3.6-27b`, `deepseek-ai--deepseek-v4-flash-0731`, `unsloth--ornith-1.0-35b-gguf--ud-q4_k_xl` | ManagedCompute |
+| Publisher | Model | Deploy type | Max TPM (sub-cdk) |
+|---|---|---|---|
+| **Anthropic** | `claude-opus-5`, `claude-sonnet-5`, `claude-mythos-5`, `claude-fable-5`, `claude-opus-4-8/7/6/5/1`, `claude-sonnet-4-6/5`, `claude-haiku-4-5` | Serverless | — |
+| **Black Forest Labs** | `Flux.1-Kontext-pro`, `Flux-1.1-Pro` | Serverless | — |
+| **Cohere** | `Cohere-command-a-plus-05-2026`, `Cohere-rerank-v4.0-pro/fast`, `embed-v-4-0`, `cohere-command-a`, `Cohere-embed-v3-multilingual` | Serverless | — |
+| **DeepSeek** | `DeepSeek-V4-Pro`, `DeepSeek-V4-Flash`, `DeepSeek-V3.2`, `DeepSeek-V3.2-Speciale`, `DeepSeek-V3.1`, `DeepSeek-V3-0324`, `DeepSeek-R1-0528`, `DeepSeek-R1` | Serverless | — |
+| **Meta** | `Llama-4-Maverick-17B-128E-Instruct-FP8`, `Llama-4-Scout-17B-16E-Instruct`, `Llama-3.3-70B-Instruct` | Serverless | `Llama-4-Scout`: 20k · `Llama-3.3-70B`: 20k |
+| **Microsoft** | `Phi-4`, `Phi-4-mini-instruct`, `Phi-4-mini-reasoning`, `Phi-4-multimodal-instruct`, `Phi-4-reasoning`, `MAI-Image-2.5`, `MAI-Image-2.5-Flash`, `MAI-Image-2e`, `MAI-Voice-1/2`, `MAI-Transcribe-1/1.5`, `model-router` | Serverless | `Phi-4`: 20k · `Phi-4-mini-instruct`: 20k · `Phi-4-mini-reasoning`: 20k · `Phi-4-multimodal-instruct`: 20k · `Phi-4-reasoning`: 20k |
+| **Mistral AI** | `Mistral-Large-3`, `mistral-medium-2505`, `mistral-small-2503`, `Ministral-3B`, `mistral-document-ai-2512/2505`, `Codestral-2501` | Serverless | `Codestral-2501`: 20k · `mistral-medium-2505`: 20k · `mistral-small-2503`: 20k |
+| **Moonshot AI** | `Kimi-K2.7-Code`, `Kimi-K2.6`, `Kimi-K2.5` | Serverless | — |
+| **OpenAI** | `gpt-5.6-sol/luna/terra`, `gpt-5.5`, `gpt-5.4/mini/nano/pro`, `gpt-5.3-chat/codex`, `gpt-5.2/chat/codex`, `gpt-5.1/chat/codex/codex-mini/codex-max`, `gpt-5/mini/nano/pro/chat/codex`, `gpt-4.1/mini/nano`, `gpt-4o/mini`, `o1`, `o3/mini/pro`, `o4-mini`, `codex-mini`, `sora-2`, `gpt-image-2`, `gpt-audio/1.5`, `gpt-realtime/2/2.1` | OpenAI | `gpt-5-mini`: 500k · `text-embedding-ada-002`: 240k |
+| **StabilityAI** | `Stable-Diffusion-3.5-Large`, `Stable-Image-Ultra`, `Stable-Image-Core` | Serverless | — |
+| **xAI** | `grok-4`, `grok-4.3`, `grok-4-20-reasoning/non-reasoning`, `grok-4-1-fast-reasoning/non-reasoning`, `grok-code-fast-1` | Serverless | — |
+| **Hugging Face** | `zai-org--glm-5.2-fp8`, `qwen--qwen3.6-27b`, `deepseek-ai--deepseek-v4-flash-0731`, `unsloth--ornith-1.0-35b-gguf--ud-q4_k_xl` | ManagedCompute | — (dedicated VM, no TPM) |
 
 ## CI/CD Pipeline
 
