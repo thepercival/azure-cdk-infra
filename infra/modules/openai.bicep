@@ -11,6 +11,7 @@ module modOpenaiAccount 'openai-account.bicep' = {
   name: 'modOpenaiAccount'
   params: {
     location: location
+    sku: openaiAccount.sku
     foundryResourceName: openaiAccount.name
     accountRoleAssignments: openaiAccount.roleAssignments
     logAnalyticsWorkspaceId: logAnalyticsWorkspaceId

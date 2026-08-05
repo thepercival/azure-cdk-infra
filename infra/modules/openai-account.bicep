@@ -2,6 +2,7 @@ param location string
 param foundryResourceName string
 param accountRoleAssignments array
 param logAnalyticsWorkspaceId string
+param sku object
 
 @secure()
 param administratorPrincipalId string
@@ -10,9 +11,7 @@ resource resOpenaiAccount 'Microsoft.CognitiveServices/accounts@2026-03-01' = {
   name: foundryResourceName
   location: location
   kind: 'AIServices'
-  sku: {
-    name: 'S1'
-  }
+  sku: sku
   identity: {
     type: 'SystemAssigned'
   }
