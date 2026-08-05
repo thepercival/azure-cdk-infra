@@ -25,9 +25,11 @@ resource resAiProject 'Microsoft.CognitiveServices/accounts/projects@2026-03-01'
   }
 }
 
+@batchSize(1)
 resource modelDeployments 'Microsoft.CognitiveServices/accounts/deployments@2026-03-01' = [for deployment in deployments: {
   parent: foundryAccount
   name: deployment.deploymentName
+  dependsOn: [resAiProject]
   sku: {
     name: deployment.skuName
     capacity: deployment.capacity
