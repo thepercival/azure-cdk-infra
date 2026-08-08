@@ -5,6 +5,7 @@ param administratorPrincipalId string
 
 param logAnalyticsWorkspace object
 param serviceBus object
+param containerRegistry object
 param openaiAccount object
 param openaiDeployments array
 param openaiProject object
@@ -42,6 +43,16 @@ module modOpenai 'modules/openai.bicep' = if(openaiAccount.deployOnEnvironment =
   }
 }
 
+module modContainerRegistry './modules/containerRegistry.bicep' = {
+  name: 'containerRegistry'
+  params: {
+    // ACR names are alphanumeric-only, so no dash separator before environment
+    name: '${containerRegistry.name}${environment}'
+    location: location
+    skuName: containerRegistry.sku[environment]
+  }
+}
+
 module modApim './modules/apim.bicep' = {
   name: 'apim'
   params: {
@@ -67,3 +78,6 @@ output serviceBusHostname string = modServicebus.outputs.serviceBusHostname
 
 output apimGatewayUrl string = modApim.outputs.apimGatewayUrl
 output apimServiceId string = modApim.outputs.apimServiceId
+
+output acrLoginServer string = modContainerRegistry.outputs.loginServer
+output acrRegistryName string = modContainerRegistry.outputs.registryName
