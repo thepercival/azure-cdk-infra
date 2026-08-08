@@ -5,7 +5,6 @@ param administratorPrincipalId string
 
 param logAnalyticsWorkspace object
 param serviceBus object
-param containerRegistry object
 param openaiAccount object
 param openaiDeployments array
 param openaiProject object
@@ -13,7 +12,7 @@ param budget object
 param dashboard object
 param apim object
 
-module modLogAnalyticsWorkspace './modules/logAnalyticsWorkspace.bicep' = {
+module modLogAnalyticsWorkspace 'br/modules:log-analytics-workspace:latest' = {
   name: 'logAnalyticsWorkspace'
   params: {
     logAnalyticsWorkspaceName: '${logAnalyticsWorkspace.name}-${environment}'
@@ -21,7 +20,7 @@ module modLogAnalyticsWorkspace './modules/logAnalyticsWorkspace.bicep' = {
   }
 }
 
-module modServicebus './modules/serviceBus.bicep' = {
+module modServicebus 'br/modules:serviceBus:latest' = {
   name: 'serviceBus'
   params: {
     servicebusName: '${serviceBus.name}-${environment}'
@@ -29,7 +28,7 @@ module modServicebus './modules/serviceBus.bicep' = {
   }
 }
 
-module modOpenai 'modules/openai.bicep' = if(openaiAccount.deployOnEnvironment == environment) {
+module modOpenai 'br/modules:openai:latest' = if(openaiAccount.deployOnEnvironment == environment) {
   name: 'modOpenai'
   params: {
     location: location
@@ -43,17 +42,18 @@ module modOpenai 'modules/openai.bicep' = if(openaiAccount.deployOnEnvironment =
   }
 }
 
-module modContainerRegistry './modules/containerRegistry.bicep' = {
-  name: 'containerRegistry'
+// Deploy monitoring dashboard for token usage and costs
+module modDashboardOpenaiCosts 'dashboard-openai-costs.bicep' = {
+  name: 'modDashboardOpenaiCosts'
   params: {
-    // ACR names are alphanumeric-only, so no dash separator before environment
-    name: '${containerRegistry.name}${environment}'
+    dashboardName: dashboard.name
     location: location
-    skuName: containerRegistry.sku[environment]
+    logAnalyticsWorkspaceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
+    aiServicesAccountName: openaiAccount.name
   }
 }
 
-module modApim './modules/apim.bicep' = {
+module modApim 'br/modules:apim:latest' = {
   name: 'apim'
   params: {
     location: location
@@ -78,6 +78,3 @@ output serviceBusHostname string = modServicebus.outputs.serviceBusHostname
 
 output apimGatewayUrl string = modApim.outputs.apimGatewayUrl
 output apimServiceId string = modApim.outputs.apimServiceId
-
-output acrLoginServer string = modContainerRegistry.outputs.loginServer
-output acrRegistryName string = modContainerRegistry.outputs.registryName

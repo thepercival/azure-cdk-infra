@@ -1,0 +1,10 @@
+{
+  "moduleAliases": {
+    "br": {
+      "modules": {
+        "registry": "acrcdkdev.azurecr.io",
+        "modulePath": "bicep/modules"
+      }
+    }
+  }
+}

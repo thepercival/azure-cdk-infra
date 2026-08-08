@@ -39,16 +39,7 @@ module modAiProjects 'openai-project.bicep' = {
     projectRoleAssignments: openaiProject.roleAssignments    
   }
 }
-// Deploy monitoring dashboard for token usage and costs
-module modDashboardOpenaiCosts 'dashboard-openai-costs.bicep' = {
-  name: 'modDashboardOpenaiCosts'
-  params: {
-    dashboardName: dashboard.name
-    location: location
-    logAnalyticsWorkspaceId: logAnalyticsWorkspaceId
-    aiServicesAccountName: openaiAccount.name
-  }
-}
+
 
 // Deploy budget alert for resource group
 module modBudget 'budget.bicep' = {
