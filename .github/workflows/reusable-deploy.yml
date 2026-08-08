@@ -79,17 +79,17 @@ jobs:
             echo "Published ${module_name}:${VERSION} → ${ACR_LOGIN_SERVER}"
           done
 
-      # - name: Deploy infrastructure from ACR modules
-      #   run: |
-      #     ACR_LOGIN_SERVER=$(az deployment group show \
-      #       --resource-group ${{ inputs.resource-group }} \
-      #       --name acr \
-      #       --query properties.outputs.acrLoginServer.value \
-      #       --output tsv)
-      #     # Point the br/modules alias at the environment-specific registry
-      #     sed -i "s|acrcdkdev.azurecr.io|${ACR_LOGIN_SERVER}|g" bicepconfig.json
-      #     az deployment group create \
-      #       --resource-group ${{ inputs.resource-group }} \
-      #       --template-file infra/main.bicep \
-      #       --parameters @infra/parameters-main.json \
-      #       --parameters environment=${{ inputs.environment }} administratorPrincipalId=${{ secrets.ENTRA_ADMINPRINCIPAL_ID }}
+      - name: Deploy infrastructure from ACR modules
+        run: |
+          ACR_LOGIN_SERVER=$(az deployment group show \
+            --resource-group ${{ inputs.resource-group }} \
+            --name acr \
+            --query properties.outputs.acrLoginServer.value \
+            --output tsv)
+          # Point the br/modules alias at the environment-specific registry
+          sed -i "s|acrcdkdev.azurecr.io|${ACR_LOGIN_SERVER}|g" bicepconfig.json
+          az deployment group create \
+            --resource-group ${{ inputs.resource-group }} \
+            --template-file infra/main.bicep \
+            --parameters @infra/parameters-main.json \
+            --parameters environment=${{ inputs.environment }} administratorPrincipalId=${{ secrets.ENTRA_ADMINPRINCIPAL_ID }}

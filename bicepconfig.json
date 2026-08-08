@@ -6,5 +6,8 @@
         "modulePath": "bicep/modules"
       }
     }
-  }
+  },
+  "trustedRegistries": [
+    "acrcdkdev.azurecr.io"
+  ]
 }

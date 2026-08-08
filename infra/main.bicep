@@ -13,7 +13,6 @@ param dashboard object
 param apim object
 
 module modLogAnalyticsWorkspace 'br/modules:log-analytics-workspace:latest' = {
-  
   name: 'logAnalyticsWorkspace'
   params: {
     logAnalyticsWorkspaceName: '${logAnalyticsWorkspace.name}-${environment}'

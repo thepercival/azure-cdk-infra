@@ -3,7 +3,6 @@ param logAnalyticsWorkspaceId string
 param openaiAccount object
 param openaiProject object
 param openaiDeployments array
-param dashboard object
 param budget object
 @secure()
 param administratorPrincipalId string
