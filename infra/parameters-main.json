@@ -94,16 +94,6 @@
                 "startDate": "2026-07-01"
             }
         },
-        "containerRegistry": {
-            "value": {
-                "name": "acrcdk",
-                "sku": {
-                    "dev": "Basic",
-                    "acc": "Standard",
-                    "prd": "Standard"
-                }
-            }
-        },
         "apim": {
             "value": {
                 "name": "apim-cdk",
