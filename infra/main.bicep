@@ -36,7 +36,6 @@ module modOpenai 'br/modules:openai:latest' = if(openaiAccount.deployOnEnvironme
     openaiAccount: openaiAccount
     openaiProject: openaiProject
     openaiDeployments: openaiDeployments
-    dashboard: dashboard
     budget: budget
     administratorPrincipalId: administratorPrincipalId  
   }
