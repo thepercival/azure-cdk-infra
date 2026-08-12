@@ -4,16 +4,14 @@ param location string
 param additionEnvironmentVariables array
 param linuxFxVersion string 
 param appServicePlanId string
-param applicationInsightsName string
- 
-resource resAppInsights 'Microsoft.Insights/components@2020-02-02' existing = {
-  name: applicationInsightsName
-}    
+param appInsightsConnectionString string
+param appInsightsWorkspaceResourceId string
+
 
 var baseEnvironmentVariables = [
   {
     name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-    value: resAppInsights.properties.ConnectionString
+    value: appInsightsConnectionString
   }
   {
     name: 'ApplicationInsightsAgent_EXTENSION_VERSION'
@@ -78,7 +76,7 @@ module diagnostics 'app-diagnostics.bicep' = {
   params: {
     appServiceName: appServiceName
     kind: diagnosticsKind
-    loganalyticsWorkspaceId: resAppInsights.properties.WorkspaceResourceId
+    loganalyticsWorkspaceId: appInsightsWorkspaceResourceId
   }
   dependsOn: [
     resAppService
