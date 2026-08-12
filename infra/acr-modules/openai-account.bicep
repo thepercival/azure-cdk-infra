@@ -1,10 +1,13 @@
+param environment string
 param location string
 param foundryResourceName string
 param roleAssignments array
 param logAnalyticsWorkspaceId string
 param deployments array
 param projects array
+param dashboard object
 param sku object
+param apiGateway object
 
 @secure()
 param administratorPrincipalId string
@@ -85,16 +88,28 @@ module modAiProjects 'openai-project.bicep' =  [for project in projects: {
 }
 ]
 
-// Deploy budget alert for resource group
-// module modBudget 'br/modules:budget:latest' = {
-//   name: 'openai-account-budget'
-//   params: {
-//     budgetName: '${budget.name}'
-//     amount: budget.amount
-//     contactEmails: budget.contactEmails
-//     startDate: budget.startDate
-//   }
-// }
+// Deploy monitoring dashboard for token usage and costs
+module modDashboardOpenaiCosts 'openai-account-dashboard.bicep' = {
+  name: 'modDashboardOpenaiCosts'
+  params: {
+    dashboardName: '${dashboard.namePrefix}-${resOpenaiAccount.name}'
+    location: location
+    logAnalyticsWorkspaceId: logAnalyticsWorkspaceId
+    aiServicesAccountName: resOpenaiAccount.name
+  }
+}
+
+
+
+module modApimOpenAi 'apim-openai.bicep' = {
+  name: 'apimOpenAi'
+  params: {
+    apimName: '${apiGateway.name}-${environment}'
+    openaiAccountName: foundryResourceName
+    tokenLimitTpmPerSubscription: apiGateway.tokenLimitTpmPerSubscription
+  }
+}
+
 
 output endpoint string = resOpenaiAccount.properties.endpoint
 output resourceName string = foundryResourceName

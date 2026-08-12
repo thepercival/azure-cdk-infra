@@ -17,8 +17,9 @@ param thresholds array = [
   100
 ]
 
-resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
+resource resResourceGroupBudget 'Microsoft.Consumption/budgets@2023-11-01' = {
   name: budgetName
+  scope: resourceGroup()
   properties: {
     timePeriod: {
       startDate: startDate
@@ -52,5 +53,5 @@ resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
   }
 }
 
-output budgetName string = budget.name
-output budgetId string = budget.id
+output budgetName string = resResourceGroupBudget.name
+output budgetId string = resResourceGroupBudget.id

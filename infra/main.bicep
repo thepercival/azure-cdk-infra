@@ -7,13 +7,10 @@ param logAnalyticsWorkspace object
 param applicationInsights object
 param serviceBus object
 param openaiAccount object
-param openaiDeployments array
-param openaiProject object
 param budget object
-param dashboard object
 param apim object
 
-module modLogAnalyticsWorkspace 'br/modules:log-analytics-workspace:latest' = {
+module modLogAnalyticsWorkspace 'acr-modules/log-analytics-workspace.bicep' = {
   name: 'logAnalyticsWorkspace'
   params: {
     logAnalyticsWorkspaceName: '${logAnalyticsWorkspace.name}-${environment}'
@@ -30,41 +27,18 @@ module modApplicationInsights 'br/modules:application-insights:latest' = {
   }
 }
 
-module modServicebus 'br/modules:servicebus:latest' = {
-  name: 'serviceBus'
+// Deploy budget alert for resource group
+module modBudget 'acr-modules/resourcegroup-budget.bicep' = {
+  name: 'resourcegroup-${resourceGroup().name}-budget'
   params: {
-    servicebusName: '${serviceBus.name}-${environment}'
-    location: location
-  }
-}
-module modOpenaiAccount 'br/modules:openai-account:latest' = {
-  name: 'modOpenaiAccount'
-  params: {
-    location: location
-    sku: openaiAccount.sku
-    foundryResourceName: openaiAccount.name
-    accountRoleAssignments: openaiAccount.roleAssignments
-    logAnalyticsWorkspaceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
-    administratorPrincipalId: administratorPrincipalId
-    deployments: openaiAccount.deployments
-    projects: openaiAccount.projects
+    budgetName: 'resourcegroup-${resourceGroup().name}-budget'
+    amount: budget.amount
+    contactEmails: budget.contactEmails
+    startDate: budget.startDate
   }
 }
 
-
-
-// Deploy monitoring dashboard for token usage and costs
-module modDashboardOpenaiCosts 'dashboard-openai-costs.bicep' = {
-  name: 'modDashboardOpenaiCosts'
-  params: {
-    dashboardName: dashboard.name
-    location: location
-    logAnalyticsWorkspaceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
-    aiServicesAccountName: openaiAccount.name
-  }
-}
-
-module modApim 'br/modules:apim:latest' = {
+module modApim 'acr-modules/apim.bicep' = {
   name: 'apim'
   params: {
     location: location
@@ -77,16 +51,29 @@ module modApim 'br/modules:apim:latest' = {
   }
 }
 
-module modApimOpenAi 'br/modules:apim-openai:latest' = if(openaiAccount.deployOnEnvironment == environment) {
-  name: 'apimOpenAi'
+module modServicebus 'acr-modules/servicebus.bicep' = {
+  name: 'serviceBus'
   params: {
-    apimName: '${apim.name}-${environment}'
-    openaiEndpoint: openaiProjectEndpoint
-    openaiAccountName: openaiProject.name
-    tokenLimitTpmPerSubscription: apim.tokenLimitTpmPerSubscription
+    servicebusName: '${serviceBus.name}-${environment}'
+    location: location
   }
 }
-
+module modOpenaiAccount 'acr-modules/openai-account.bicep' = if(openaiAccount.deployOnEnvironment == environment) {
+  name: 'modOpenaiAccount'
+  params: {
+    location: location
+    sku: openaiAccount.sku
+    foundryResourceName: openaiAccount.name
+    roleAssignments: openaiAccount.roleAssignments
+    logAnalyticsWorkspaceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
+    administratorPrincipalId: administratorPrincipalId
+    deployments: openaiAccount.deployments
+    projects: openaiAccount.projects
+    dashboard: openaiAccount.dashboard
+    apiGateway: openaiAccount.apiGateway
+    environment: environment
+  }
+}
 
 output logAnalyticsWorkspaceId string = modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
 output logAnalyticsWorkspaceName string = modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceName

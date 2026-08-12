@@ -79,19 +79,19 @@
                             }
                         ]
                     }
-                ]
-            }
-        },
-        
-            
-        "dashboard": {
-            "value": {
-                "name": "dashboard-foundry-costs"
+                ],
+                "dashboard": {          
+                    "namePrefix": "db-openai-account"
+                },
+                "apiGateway": {
+                    "name": "apim-cdk",
+                    "tokenLimitTpmPerSubscription": 10000
+                }
             }
         },
         "budget": {
             "value": {
-                "name": "budget-dev-foundry",
+                "name": "budget-resourcegroup",
                 "amount": 50,
                 "contactEmails": [
                     "cdkdev@pm.me"
@@ -117,8 +117,7 @@
                         "name": "?",
                         "capacity": 1
                     }
-                },
-                "tokenLimitTpmPerSubscription": 10000
+                }
             }
         }
     }
