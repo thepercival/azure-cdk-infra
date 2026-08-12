@@ -2,6 +2,8 @@ param location string
 param foundryResourceName string
 param accountRoleAssignments array
 param logAnalyticsWorkspaceId string
+param deployments array
+param projects array
 param sku object
 
 @secure()
@@ -34,8 +36,8 @@ resource foundryRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04
 }]
 
 // Diagnostic settings for Application Insights integration
-resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = if (!empty(logAnalyticsWorkspaceId)) {
-  name: 'send-to-log-analytics'
+resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'openai-analytics-${resOpenaiAccount.name}'
   scope: resOpenaiAccount
   properties: {
     workspaceId: logAnalyticsWorkspaceId
@@ -59,6 +61,37 @@ resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-pr
         }
       }
     ]
+  }
+}
+
+module modAiModelDeployments 'br/modules:openai-modeldeployments:latest' = {
+  name: 'modAiModelDeployments'
+  params: {
+    accountName: resOpenaiAccount.name
+    deployments: deployments
+    
+  }
+}
+
+module modAiProjects 'br/modules:openai-project:latest' =  [for project in projects: {
+  name: 'modAiProject-${project.name}'
+  params: {
+    accountName: resOpenaiAccount.name
+    name: project.name
+    description: project.description
+    location: location
+    roleAssignments: project.roleAssignments
+  }
+}
+
+// Deploy budget alert for resource group
+module modBudget 'br/modules:budget:latest' = {
+  name: 'openai-account-budget'
+  params: {
+    budgetName: '${budget.name}'
+    amount: budget.amount
+    contactEmails: budget.contactEmails
+    startDate: budget.startDate
   }
 }
 

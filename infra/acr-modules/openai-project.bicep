@@ -1,9 +1,9 @@
 param accountName string
-param projectName string
-param projectDescription string
-param projectLocation string
+param name string
+param description string
+param location string
 
-param projectRoleAssignments array
+param roleAssignments array
 
 resource foundryAccount 'Microsoft.CognitiveServices/accounts@2026-03-01' existing = {
   name: accountName
@@ -11,25 +11,25 @@ resource foundryAccount 'Microsoft.CognitiveServices/accounts@2026-03-01' existi
 
 resource resAiProject 'Microsoft.CognitiveServices/accounts/projects@2026-03-01' = {
   parent: foundryAccount
-  name: projectName
-  location: projectLocation
+  name: name
+  location: location
   identity: {
     type: 'SystemAssigned'
   }
   properties: {
-    displayName: projectName
-    description: projectDescription
+    displayName: name
+    description: description
   }
 }
 
 // Role assignments at project level
-resource resProjectRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for projectRoleAssignment in projectRoleAssignments: if(projectRoleAssignment.projectPrincipalId != null) {
-  name: guid(resAiProject.id, projectRoleAssignment.projectPrincipalId, projectRoleAssignment.roleDefinitionId)
+resource resProjectRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for roleAssignment in roleAssignments: if(roleAssignment.projectPrincipalId != null) {
+  name: guid(resAiProject.id, roleAssignment.projectPrincipalId, roleAssignment.roleDefinitionId)
   scope: resAiProject
   properties: {
-    principalId: projectRoleAssignment.projectPrincipalId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', projectRoleAssignment.roleDefinitionId)
-    principalType: projectRoleAssignment.projectPrincipalType
+    principalId: roleAssignment.projectPrincipalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleAssignment.roleDefinitionId)
+    principalType: roleAssignment.projectPrincipalType
   }
 }]
 

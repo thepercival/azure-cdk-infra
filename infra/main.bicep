@@ -37,31 +37,21 @@ module modServicebus 'br/modules:servicebus:latest' = {
     location: location
   }
 }
-
-module modOpenai 'br/modules:openai:latest' = if(openaiAccount.deployOnEnvironment == environment) {
-  name: 'modOpenai'
+module modOpenaiAccount 'br/modules:openai-account:latest' = {
+  name: 'modOpenaiAccount'
   params: {
     location: location
+    sku: openaiAccount.sku
+    foundryResourceName: openaiAccount.name
+    accountRoleAssignments: openaiAccount.roleAssignments
     logAnalyticsWorkspaceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
-    openaiAccount: openaiAccount
-    openaiProject: openaiProject
-    openaiDeployments: openaiDeployments
-    budget: budget
-    administratorPrincipalId: administratorPrincipalId  
+    administratorPrincipalId: administratorPrincipalId
+    deployments: openaiAccount.deployments
+    projects: openaiAccount.projects
   }
 }
 
-module modOpenaiProject 'br/modules:openai-project:latest' = if(openaiAccount.deployOnEnvironment == environment) {
-  name: 'modOpenaiProject'
-  params: {
-    accountName: openaiAccount.name
-    projectName: openaiProject.name
-    projectDescription: openaiProject.description
-    projectLocation: openaiProject.location == '' ? location : openaiProject.location
-    projectRoleAssignments: openaiProject.roleAssignments
-  }
-}
-var openaiProjectEndpoint string = modOpenaiProject.outputs?.openaiProjectEndpoint
+
 
 // Deploy monitoring dashboard for token usage and costs
 module modDashboardOpenaiCosts 'dashboard-openai-costs.bicep' = {
