@@ -224,6 +224,7 @@ resource resDashboard 'Microsoft.Portal/dashboards@2020-09-01-preview' = {
                   isOptional: true
                 }
               ]
+              #disable-next-line BCP036
               type: 'Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart'
             }
           }
@@ -310,6 +311,7 @@ resource resDashboard 'Microsoft.Portal/dashboards@2020-09-01-preview' = {
                   isOptional: true
                 }
               ]
+              #disable-next-line BCP036
               type: 'Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart'
             }
           }
@@ -396,6 +398,7 @@ resource resDashboard 'Microsoft.Portal/dashboards@2020-09-01-preview' = {
                   isOptional: true
                 }
               ]
+              #disable-next-line BCP036
               type: 'Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart'
             }
           }
@@ -482,6 +485,7 @@ resource resDashboard 'Microsoft.Portal/dashboards@2020-09-01-preview' = {
                   isOptional: true
                 }
               ]
+              #disable-next-line BCP036
               type: 'Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart'
             }
           }
@@ -568,6 +572,7 @@ resource resDashboard 'Microsoft.Portal/dashboards@2020-09-01-preview' = {
                   isOptional: true
                 }
               ]
+              #disable-next-line BCP036
               type: 'Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart'
             }
           }
@@ -626,6 +631,7 @@ resource resDashboard 'Microsoft.Portal/dashboards@2020-09-01-preview' = {
                   isOptional: true
                 }
               ]
+              #disable-next-line BCP036
               type: 'Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart'
             }
           }

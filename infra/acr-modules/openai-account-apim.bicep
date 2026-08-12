@@ -88,7 +88,7 @@ resource resApi 'Microsoft.ApiManagement/service/apis@2024-06-01-preview' = {
 //   4. Route to AI Foundry backend
 // ─────────────────────────────────────────────
 // {TOKEN_LIMIT} is substituted at deploy time from the tokenLimitTpmPerSubscription parameter
-var policyXmlTmp = replace(loadTextContent('policy.xml'), '{TOKEN_LIMIT}', string(tokenLimitTpmPerSubscription))
+var policyXmlTmp = replace(loadTextContent('apim-openai-policy.xml'), '{TOKEN_LIMIT}', string(tokenLimitTpmPerSubscription))
 var policyXml = replace(policyXmlTmp, '{OPENAI_ACCOUNT_NAME}', openaiAccountName)
 
 resource resApiPolicy 'Microsoft.ApiManagement/service/apis/policies@2024-06-01-preview' = {

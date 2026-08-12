@@ -40,7 +40,7 @@ resource foundryRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04
 
 // Diagnostic settings for Application Insights integration
 resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: 'openai-analytics-${resOpenaiAccount.name}'
+  name: 'send-to-log-analytics'
   scope: resOpenaiAccount
   properties: {
     workspaceId: logAnalyticsWorkspaceId

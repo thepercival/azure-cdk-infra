@@ -1,6 +1,6 @@
 param apimName string
 param openaiAccountName string
-param tokenLimitTpmPerSubscription string
+param tokenLimitTpmPerSubscription int
 
 var openaiEndpoint = 'https://${openaiAccountName}.cognitiveservices.azure.com/'
 
@@ -87,8 +87,8 @@ resource resApi 'Microsoft.ApiManagement/service/apis@2024-06-01-preview' = {
 //   3. Emit token-usage metrics to Azure Monitor (observability)
 //   4. Route to AI Foundry backend
 // ─────────────────────────────────────────────
-// {TOKEN_LIMIT} is substituted at deploy time from the tokenLimitTpmPerSubscription parameter
-var policyXml = replace(loadTextContent('policy.xml'), '{TOKEN_LIMIT}', string(tokenLimitTpmPerSubscription))
+// {TOKEN_LIMIT} and {OPENAI_ACCOUNT_NAME} are substituted at deploy time
+var policyXml = replace(replace(loadTextContent('apim-openai-policy.xml'), '{TOKEN_LIMIT}', string(tokenLimitTpmPerSubscription)), '{OPENAI_ACCOUNT_NAME}', openaiAccountName)
 
 resource resApiPolicy 'Microsoft.ApiManagement/service/apis/policies@2024-06-01-preview' = {
   parent: resApi
