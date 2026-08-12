@@ -32,3 +32,8 @@ resource resProjectRoleAssignments 'Microsoft.Authorization/roleAssignments@2022
     principalType: projectRoleAssignment.projectPrincipalType
   }
 }]
+
+output openaiProjectEndpoint string = foundryAccount.properties.endpoint
+output openaiProjectName string = resAiProject.name
+output openaiProjectId string = resAiProject.id
+output openaiProjectPrincipalId string = resAiProject.identity.principalId

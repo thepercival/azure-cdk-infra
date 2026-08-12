@@ -1,7 +1,8 @@
 param apimName string
 param openaiAccountName string
-param openaiEndpoint string
 param tokenLimitTpmPerSubscription string
+
+var openaiEndpoint = 'https://${openaiAccountName}.cognitiveservices.azure.com/'
 
 // ─────────────────────────────────────────────
 // APIM Service (system-assigned MSI for keyless auth to AI Foundry)
@@ -16,9 +17,9 @@ resource resApimService 'Microsoft.ApiManagement/service@2024-06-01-preview' exi
 // ─────────────────────────────────────────────
 resource resNamedValueEndpoint 'Microsoft.ApiManagement/service/namedValues@2024-06-01-preview' = {
   parent: resApimService
-  name: 'foundry-openai-endpoint'
+  name: 'openai-${openaiAccountName}-endpoint'
   properties: {
-    displayName: 'foundry-openai-endpoint'
+    displayName: 'foundry-openai-${openaiAccountName}-endpoint'
     value: openaiEndpoint
     secret: false
   }
@@ -31,9 +32,9 @@ resource resNamedValueEndpoint 'Microsoft.ApiManagement/service/namedValues@2024
 //
 resource resBackend 'Microsoft.ApiManagement/service/backends@2024-06-01-preview' = {
   parent: resApimService
-  name: 'foundry-openai-backend'
+  name: 'openai-${openaiAccountName}-backend'
   properties: {
-    description: 'Azure AI Foundry / OpenAI backend'
+    description: 'Azure OpenAI backend'
     url: '${openaiEndpoint}openai'
     protocol: 'http'
     circuitBreaker: {
@@ -63,10 +64,10 @@ resource resBackend 'Microsoft.ApiManagement/service/backends@2024-06-01-preview
 // ─────────────────────────────────────────────
 resource resApi 'Microsoft.ApiManagement/service/apis@2024-06-01-preview' = {
   parent: resApimService
-  name: 'azure-openai'
+  name: 'azure-openai-${openaiAccountName}'
   properties: {
-    displayName: 'Azure OpenAI'
-    description: 'Azure AI Foundry OpenAI-compatible gateway API'
+    displayName: 'Azure OpenAI ${openaiAccountName}'
+    description: 'Azure OpenAI ${openaiAccountName} OpenAI-compatible gateway API'
     path: 'openai'
     protocols: [ 'https' ]
     subscriptionRequired: true
@@ -87,7 +88,8 @@ resource resApi 'Microsoft.ApiManagement/service/apis@2024-06-01-preview' = {
 //   4. Route to AI Foundry backend
 // ─────────────────────────────────────────────
 // {TOKEN_LIMIT} is substituted at deploy time from the tokenLimitTpmPerSubscription parameter
-var policyXml = replace(loadTextContent('policy.xml'), '{TOKEN_LIMIT}', string(tokenLimitTpmPerSubscription))
+var policyXmlTmp = replace(loadTextContent('policy.xml'), '{TOKEN_LIMIT}', string(tokenLimitTpmPerSubscription))
+var policyXml = replace(policyXmlTmp, '{OPENAI_ACCOUNT_NAME}', openaiAccountName)
 
 resource resApiPolicy 'Microsoft.ApiManagement/service/apis/policies@2024-06-01-preview' = {
   parent: resApi

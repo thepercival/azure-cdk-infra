@@ -4,11 +4,11 @@ param environment string
 param administratorPrincipalId string
 
 param logAnalyticsWorkspace object
+param applicationInsights object
 param serviceBus object
 param openaiAccount object
 param openaiDeployments array
 param openaiProject object
-param openaiConfig object
 param budget object
 param dashboard object
 param apim object
@@ -18,6 +18,15 @@ module modLogAnalyticsWorkspace 'br/modules:log-analytics-workspace:latest' = {
   params: {
     logAnalyticsWorkspaceName: '${logAnalyticsWorkspace.name}-${environment}'
     location: location
+  }
+}
+
+module modApplicationInsights 'br/modules:application-insights:latest' = {
+  name: 'applicationInsights'
+  params: {
+    applicationInsightsName: '${applicationInsights.name}-${environment}'
+    location: location
+    logAnalyticsWorkspaceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
   }
 }
 
@@ -52,6 +61,7 @@ module modOpenaiProject 'br/modules:openai-project:latest' = if(openaiAccount.de
     projectRoleAssignments: openaiProject.roleAssignments
   }
 }
+var openaiProjectEndpoint string = modOpenaiProject.outputs?.openaiProjectEndpoint
 
 // Deploy monitoring dashboard for token usage and costs
 module modDashboardOpenaiCosts 'dashboard-openai-costs.bicep' = {
@@ -77,13 +87,13 @@ module modApim 'br/modules:apim:latest' = {
   }
 }
 
-module modApimOpenAi 'br/modules:apim-openai:latest' = {
+module modApimOpenAi 'br/modules:apim-openai:latest' = if(openaiAccount.deployOnEnvironment == environment) {
   name: 'apimOpenAi'
   params: {
     apimName: '${apim.name}-${environment}'
-    openaiEndpoint: modOpenaiProject.outputs.openaiProjectEndpoint
+    openaiEndpoint: openaiProjectEndpoint
     openaiAccountName: openaiProject.name
-    tokenLimitTpmPerSubscription: openAiConfig.tokenLimitTpmPerSubscription
+    tokenLimitTpmPerSubscription: apim.tokenLimitTpmPerSubscription
   }
 }
 

@@ -16,7 +16,7 @@
       <dimension name="API Name" value="@(context.Api.Name)" />
       <dimension name="Operation ID" value="@(context.Operation.Id)" />
     </azure-openai-emit-token-metric>
-    <set-backend-service backend-id="foundry-openai-backend" />
+    <set-backend-service backend-id="openai-{OPENAI_ACCOUNT_NAME}-backend" />
   </inbound>
   <backend><base /></backend>
   <outbound><base /></outbound>
