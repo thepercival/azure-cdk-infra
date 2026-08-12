@@ -64,7 +64,7 @@ resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-pr
   }
 }
 
-module modAiModelDeployments 'br/modules:openai-modeldeployments:latest' = {
+module modAiModelDeployments 'openai-modeldeployments.bicep' = {
   name: 'modAiModelDeployments'
   params: {
     accountName: resOpenaiAccount.name
@@ -73,7 +73,7 @@ module modAiModelDeployments 'br/modules:openai-modeldeployments:latest' = {
   }
 }
 
-module modAiProjects 'br/modules:openai-project:latest' =  [for project in projects: {
+module modAiProjects 'openai-project.bicep' =  [for project in projects: {
   name: 'modAiProject-${project.name}'
   params: {
     accountName: resOpenaiAccount.name
