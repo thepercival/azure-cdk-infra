@@ -1,6 +1,6 @@
 param location string
 param foundryResourceName string
-param accountRoleAssignments array
+param roleAssignments array
 param logAnalyticsWorkspaceId string
 param deployments array
 param projects array
@@ -25,13 +25,13 @@ resource resOpenaiAccount 'Microsoft.CognitiveServices/accounts@2026-03-01' = {
 }
 
 // Role assignments at account level (for account-wide management permissions)
-resource foundryRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for assignment in accountRoleAssignments: {
-  name: guid(resOpenaiAccount.id, administratorPrincipalId, assignment.roleDefinitionId)
+resource foundryRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for roleAssignment in roleAssignments: {
+  name: guid(resOpenaiAccount.id, administratorPrincipalId, roleAssignment.roleDefinitionId)
   scope: resOpenaiAccount
   properties: {
     principalId: administratorPrincipalId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', assignment.roleDefinitionId)
-    principalType: assignment.principalType
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleAssignment.roleDefinitionId)
+    principalType: roleAssignment.principalType
   }
 }]
 
@@ -83,20 +83,21 @@ module modAiProjects 'br/modules:openai-project:latest' =  [for project in proje
     roleAssignments: project.roleAssignments
   }
 }
+]
 
 // Deploy budget alert for resource group
-module modBudget 'br/modules:budget:latest' = {
-  name: 'openai-account-budget'
-  params: {
-    budgetName: '${budget.name}'
-    amount: budget.amount
-    contactEmails: budget.contactEmails
-    startDate: budget.startDate
-  }
-}
+// module modBudget 'br/modules:budget:latest' = {
+//   name: 'openai-account-budget'
+//   params: {
+//     budgetName: '${budget.name}'
+//     amount: budget.amount
+//     contactEmails: budget.contactEmails
+//     startDate: budget.startDate
+//   }
+// }
 
 output endpoint string = resOpenaiAccount.properties.endpoint
 output resourceName string = foundryResourceName
 output resourceId string = resOpenaiAccount.id
 output principalId string = resOpenaiAccount.identity.principalId
-output accountRoleAssignments array = accountRoleAssignments // [for assignment in accountRoleAssignments: assignment.roleDefinitionId]
+output roleAssignments array = roleAssignments // [for assignment in roleAssignments: assignment.roleDefinitionId]
