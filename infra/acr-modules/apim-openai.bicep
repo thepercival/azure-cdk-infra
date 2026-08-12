@@ -32,7 +32,7 @@ resource resNamedValueEndpoint 'Microsoft.ApiManagement/service/namedValues@2024
 //
 resource resBackend 'Microsoft.ApiManagement/service/backends@2024-06-01-preview' = {
   parent: resApimService
-  name: 'foundry-openai-${openaiAccountName}-backend'
+  name: 'openai-${openaiAccountName}-backend'
   properties: {
     description: 'Azure AI ${openaiAccountName} Foundry / OpenAI backend'
     url: '${openaiEndpoint}openai'
