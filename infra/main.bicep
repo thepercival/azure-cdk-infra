@@ -18,7 +18,7 @@ module modLogAnalyticsWorkspace 'acr-modules/log-analytics-workspace.bicep' = {
   }
 }
 
-module modApplicationInsights 'br/modules:application-insights:latest' = {
+module modApplicationInsights 'acr-modules/application-insights.bicep' = {
   name: 'applicationInsights'
   params: {
     applicationInsightsName: '${applicationInsights.name}-${environment}'
