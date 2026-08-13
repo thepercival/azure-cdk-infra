@@ -78,6 +78,7 @@ module modAiModelDeployments 'openai-modeldeployments.bicep' = {
 
 module modAiProjects 'openai-project.bicep' = [for project in projects: if(project.deploy[environment]) {
   name: 'modAiProject-${project.name}'
+  dependsOn: [ modAiModelDeployments ]
   params: {
     accountName: resOpenaiAccount.name
     name: '${project.name}-${environment}'
