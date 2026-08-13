@@ -60,8 +60,13 @@
                 ],
                 "projects": [
                     {
-                        "name": "CDK_Dev_AI_Project",
-                        "description": "Enhance Dev Ops with AI - Project",
+                        "name": "aoai-project-devops",
+                        "description": "Enhance DevOps with AI - Project",
+                        "deploy": {
+                            "dev": true,
+                            "acc": false,
+                            "prd": false
+                        },
                         "roleAssignments": [
                             {
                                 "projectPrincipalId": null,

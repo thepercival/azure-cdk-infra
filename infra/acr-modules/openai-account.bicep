@@ -76,11 +76,11 @@ module modAiModelDeployments 'openai-modeldeployments.bicep' = {
   }
 }
 
-module modAiProjects 'openai-project.bicep' =  [for project in projects: {
+module modAiProjects 'openai-project.bicep' = [for project in projects: if(project.deploy[environment]) {
   name: 'modAiProject-${project.name}'
   params: {
     accountName: resOpenaiAccount.name
-    name: project.name
+    name: '${project.name}-${environment}'
     description: project.description
     location: location
     roleAssignments: project.roleAssignments
