@@ -64,7 +64,7 @@ module modOpenaiAccount 'acr-modules/openai-account.bicep' = if(openaiAccount.de
   params: {
     location: location
     sku: openaiAccount.sku
-    foundryResourceName: openaiAccount.name
+    openAiAccountName: openaiAccount.name
     roleAssignments: openaiAccount.roleAssignments
     logAnalyticsWorkspaceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
     administratorPrincipalId: administratorPrincipalId

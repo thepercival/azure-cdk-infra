@@ -1,6 +1,6 @@
 param environment string
 param location string
-param foundryResourceName string
+param openAiAccountName string
 param roleAssignments array
 param logAnalyticsWorkspaceId string
 param deployments array
@@ -13,7 +13,7 @@ param apiGateway object
 param administratorPrincipalId string
 
 resource resOpenaiAccount 'Microsoft.CognitiveServices/accounts@2026-03-01' = {
-  name: foundryResourceName
+  name: openAiAccountName
   location: location
   kind: 'AIServices'
   sku: sku
@@ -21,7 +21,7 @@ resource resOpenaiAccount 'Microsoft.CognitiveServices/accounts@2026-03-01' = {
     type: 'SystemAssigned'
   }
   properties: {
-    customSubDomainName: foundryResourceName
+    customSubDomainName: openAiAccountName
     publicNetworkAccess: 'Enabled'
     allowProjectManagement: true
   }
@@ -105,14 +105,14 @@ module modApimOpenAi 'apim-openai.bicep' = {
   name: 'apimOpenAi'
   params: {
     apimName: '${apiGateway.name}-${environment}'
-    openaiAccountName: foundryResourceName
+    openaiAccountName: resOpenaiAccount.name
     tokenLimitTpmPerSubscription: apiGateway.tokenLimitTpmPerSubscription
   }
 }
 
 
 output endpoint string = resOpenaiAccount.properties.endpoint
-output resourceName string = foundryResourceName
+output resourceName string = resOpenaiAccount.name
 output resourceId string = resOpenaiAccount.id
 output principalId string = resOpenaiAccount.identity.principalId
 output roleAssignments array = roleAssignments // [for assignment in roleAssignments: assignment.roleDefinitionId]

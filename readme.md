@@ -317,3 +317,57 @@ To raise the limit, increase `capacity` in `infra/parameters/parameters.json` un
 | dev | `rg-core-dev` |
 | acc | `rg-core-acc` |
 | prd | `rg-core-prd` |
+
+## Multi-project Architecture
+
+### Limits per AI Services account
+
+| | Limit | Practical recommendation |
+|---|---|---|
+| **Projects per account** | 250 | ≤ 20–30 per account |
+| **Model deployments per account** | 32 | — |
+| **TPM quota** | Account-wide (shared across all projects) | — |
+
+Deployments are **account-scoped**, not project-scoped — all projects share the same 32 deployment slots and the same TPM pool.
+
+### Quota isolation: the noisy-neighbor problem
+
+```
+aoai-cdk account
+  ├── gpt-5-mini        → 10,000 TPM  (account-wide pool)
+  ├── Codestral-2501    → 10,000 TPM  (account-wide pool)
+  │
+  ├── project: teamA   ─┐
+  ├── project: teamB   ─┼─ all compete for the same TPM quota
+  └── project: teamC   ─┘
+```
+
+**Add a second account when:**
+- You need more than 32 model deployments
+- Teams need isolated quota (no noisy-neighbor risk)
+- Different data residency or compliance requirements per business unit
+- You want independent circuit breakers in APIM
+
+The APIM backend pool in this repo already supports multiple accounts — add an entry to `openaiBackends` in `main.bicep` and a second `openai-account` module call.
+
+### Resource group layout per business project
+
+`Microsoft.CognitiveServices/accounts/projects` is a child resource of the AI Services account and must reside in the same resource group. Business-project resources live in their own resource groups and are accessed via the Foundry project's Managed Identity.
+
+```
+rg-core/
+  ├── AI Services account (aoai-cdk)
+  │     ├── project: foundry-project-teamA    ← has System-Assigned MSI
+  │     └── project: foundry-project-teamB    ← has System-Assigned MSI
+  ├── APIM, Log Analytics, Application Insights
+
+rg-project-teamA/
+  ├── App Service, Storage, Service Bus
+  └── Role assignment: foundry-project-teamA MSI → relevant roles here
+
+rg-project-teamB/
+  ├── App Service, Storage, Key Vault
+  └── Role assignment: foundry-project-teamB MSI → relevant roles here
+```
+
+The `openai-project.bicep` module already outputs `principalId` — pass it into each business project's own Bicep deployment to create the cross-resource-group role assignments.

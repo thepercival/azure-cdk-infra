@@ -5,12 +5,12 @@ param location string
 
 param roleAssignments array
 
-resource foundryAccount 'Microsoft.CognitiveServices/accounts@2026-03-01' existing = {
+resource resOpenAiAccount 'Microsoft.CognitiveServices/accounts@2026-03-01' existing = {
   name: accountName
 }
 
 resource resAiProject 'Microsoft.CognitiveServices/accounts/projects@2026-03-01' = {
-  parent: foundryAccount
+  parent: resOpenAiAccount
   name: name
   location: location
   identity: {
@@ -33,7 +33,7 @@ resource resProjectRoleAssignments 'Microsoft.Authorization/roleAssignments@2022
   }
 }]
 
-output openaiProjectEndpoint string = foundryAccount.properties.endpoint
-output openaiProjectName string = resAiProject.name
-output openaiProjectId string = resAiProject.id
-output openaiProjectPrincipalId string = resAiProject.identity.principalId
+// output endpoint string = resOpenAiAccount.properties.endpoint
+output name string = resAiProject.name
+output id string = resAiProject.id
+output principalId string = resAiProject.identity.principalId
