@@ -6,7 +6,7 @@ param linuxFxVersion string
 param appServicePlanId string
 param appInsightsConnectionString string
 param appInsightsWorkspaceResourceId string
-
+param withStagingSlot bool
 
 var baseEnvironmentVariables = [
   {
@@ -41,7 +41,7 @@ resource resAppService 'Microsoft.Web/sites@2025-03-01' = {
 
 
 @description('webapp staging slot')
-resource resWebAppSlot 'Microsoft.Web/sites/slots@2025-03-01' = {
+resource resWebAppSlot 'Microsoft.Web/sites/slots@2025-03-01' = if(withStagingSlot) {
   parent: resAppService
   name: 'staging'
   location: location
