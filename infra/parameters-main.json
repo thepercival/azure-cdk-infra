@@ -46,15 +46,6 @@
                         "skuName": "GlobalStandard",
                         "capacity": 5,
                         "roleAssignments": []
-                    },
-                    {
-                        "deploymentName": "Codestral-2501",
-                        "modelName": "Codestral-2501",
-                        "modelVersion": "2",
-                        "modelFormat": "Mistral AI",
-                        "skuName": "GlobalStandard",
-                        "capacity": 5,
-                        "roleAssignments": []
                     }
                 ],
                 "projects": [
