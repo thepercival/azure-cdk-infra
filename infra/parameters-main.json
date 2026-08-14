@@ -19,7 +19,7 @@
         },
         "openaiAccount": {
             "value": {
-                "name": "aoai-cdk",
+                "name": "ais-cdk",
                 "sku": {
                     "name": "S0"
                 },
@@ -59,7 +59,7 @@
                 ],
                 "projects": [
                     {
-                        "name": "aoai-project-devops",
+                        "name": "aisp-devops",
                         "description": "Enhance DevOps with AI - Project",
                         "deploy": {
                             "dev": true,
