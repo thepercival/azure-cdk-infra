@@ -20,7 +20,6 @@
         "openaiAccount": {
             "value": {
                 "name": "aoai-cdk",
-                "deployOnEnvironment": "dev",
                 "sku": {
                     "name": "S0"
                 },

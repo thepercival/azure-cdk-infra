@@ -59,12 +59,12 @@ module modServicebus 'acr-modules/servicebus.bicep' = {
     location: location
   }
 }
-module modOpenaiAccount 'acr-modules/openai-account.bicep' = if(openaiAccount.deployOnEnvironment == environment) {
+module modOpenaiAccount 'acr-modules/openai-account.bicep' = {
   name: 'modOpenaiAccount'
   params: {
     location: location
     sku: openaiAccount.sku
-    openAiAccountName: openaiAccount.name
+    openAiAccountName: '${openaiAccount.name}-${environment}'
     roleAssignments: openaiAccount.roleAssignments
     logAnalyticsWorkspaceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
     administratorPrincipalId: administratorPrincipalId
