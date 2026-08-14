@@ -41,52 +41,57 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # - name: Create resource group if not exists
-      #   run: |
-      #     az group create \
-      #       --name ${{ inputs.resource-group }} \
-      #       --location ${{ inputs.location }} \
-      #       --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Create resource group if not exists
+        run: |
+          az group create \
+            --name ${{ inputs.resource-group }} \
+            --location ${{ inputs.location }} \
+            --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # - name: Deploy ACR
-      #   run: |
-      #     az deployment group create \
-      #       --resource-group ${{ inputs.resource-group }} \
-      #       --template-file infra/acr.bicep \
-      #       --parameters @infra/parameters-acr.json \
-      #       --parameters environment=${{ inputs.environment }}
+      - name: Deploy ACR
+        run: |
+          az deployment group create \
+            --resource-group ${{ inputs.resource-group }} \
+            --template-file infra/acr.bicep \
+            --parameters @infra/parameters-acr.json \
+            --parameters environment=${{ inputs.environment }}
 
-      - name: Publish Bicep modules to ACR
+      - name: Resolve ACR login server
+        id: acr
         run: |
           ACR_LOGIN_SERVER=$(az deployment group show \
             --resource-group ${{ inputs.resource-group }} \
             --name acr \
             --query properties.outputs.acrLoginServer.value \
             --output tsv)
-          # version: 0.0.<run_number> — increments on every CI run
-          VERSION="0.0.${{ github.run_number }}"
+          echo "login-server=${ACR_LOGIN_SERVER}" >> "$GITHUB_OUTPUT"
           az acr login --name "${ACR_LOGIN_SERVER%%.*}"
+
+      - name: Publish changed Bicep modules to ACR
+        run: |
+          ACR_LOGIN_SERVER="${{ steps.acr.outputs.login-server }}"
+          VERSION="0.0.${{ github.run_number }}"
+          CHANGED=$(git diff --name-only origin/main...HEAD -- infra/acr-modules/*.bicep)
           for bicep_file in infra/acr-modules/*.bicep; do
             module_name="$(basename "$bicep_file" .bicep)"
-            az bicep publish \
-              --file "$bicep_file" \
-              --target "br:${ACR_LOGIN_SERVER}/bicep/modules/${module_name}:${VERSION}" \
-              --force
-            az bicep publish \
-              --file "$bicep_file" \
-              --target "br:${ACR_LOGIN_SERVER}/bicep/modules/${module_name}:latest" \
-              --force
-            echo "Published ${module_name}:${VERSION} → ${ACR_LOGIN_SERVER}"
+            if echo "$CHANGED" | grep -qF "$bicep_file"; then
+              az bicep publish \
+                --file "$bicep_file" \
+                --target "br:${ACR_LOGIN_SERVER}/bicep/modules/${module_name}:${VERSION}" \
+                --force
+              az bicep publish \
+                --file "$bicep_file" \
+                --target "br:${ACR_LOGIN_SERVER}/bicep/modules/${module_name}:latest" \
+                --force
+              echo "Published  ${module_name}:${VERSION}"
+            else
+              echo "Unchanged  ${module_name} — skipped"
+            fi
           done
 
       - name: Deploy infrastructure from ACR modules
         run: |
-          ACR_LOGIN_SERVER=$(az deployment group show \
-            --resource-group ${{ inputs.resource-group }} \
-            --name acr \
-            --query properties.outputs.acrLoginServer.value \
-            --output tsv)
-          # Point the br/modules alias at the environment-specific registry
+          ACR_LOGIN_SERVER="${{ steps.acr.outputs.login-server }}"
           sed -i "s|acrcdkdev.azurecr.io|${ACR_LOGIN_SERVER}|g" bicepconfig.json
           az deployment group create \
             --resource-group ${{ inputs.resource-group }} \
