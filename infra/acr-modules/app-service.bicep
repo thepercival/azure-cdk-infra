@@ -7,6 +7,8 @@ param appServicePlanId string
 param appInsightsConnectionString string
 param appInsightsWorkspaceResourceId string
 param withStagingSlot bool
+param restrictToApim bool = false
+param startupCommand string = 'node dist/server.js'
 
 var baseEnvironmentVariables = [
   {
@@ -21,6 +23,33 @@ var baseEnvironmentVariables = [
 
 var environmentVariables = concat(baseEnvironmentVariables, additionEnvironmentVariables)
 
+
+
+var apimOnlyRestrictions = [
+  {
+    name: 'AllowAPIM'
+    description: 'Allow inbound traffic from APIM only'
+    action: 'Allow'
+    priority: 100
+    tag: 'ServiceTag'
+    ipAddress: 'ApiManagement'
+  }
+]
+
+var siteConfigBase = {
+  appSettings: environmentVariables
+  linuxFxVersion: linuxFxVersion
+  minTlsVersion: '1.2'  
+  appCommandLine: startupCommand
+}
+
+var siteConfig = restrictToApim ? union(siteConfigBase, {
+  ipSecurityRestrictions: apimOnlyRestrictions
+  ipSecurityRestrictionsDefaultAction: 'Deny'
+  scmIpSecurityRestrictions: apimOnlyRestrictions
+  scmIpSecurityRestrictionsDefaultAction: 'Deny'
+}) : siteConfigBase
+
 resource resAppService 'Microsoft.Web/sites@2025-03-01' = {
   name: appServiceName
   location: location
@@ -31,11 +60,7 @@ resource resAppService 'Microsoft.Web/sites@2025-03-01' = {
   properties: {
     serverFarmId: appServicePlanId    
     httpsOnly: true
-    siteConfig: {
-      appSettings: environmentVariables
-      linuxFxVersion: linuxFxVersion
-      minTlsVersion: '1.2'
-    }
+    siteConfig: siteConfig
   }
 }
 

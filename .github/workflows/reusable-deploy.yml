@@ -56,28 +56,28 @@ jobs:
       #       --parameters @infra/parameters-acr.json \
       #       --parameters environment=${{ inputs.environment }}
 
-      # - name: Publish Bicep modules to ACR
-      #   run: |
-      #     ACR_LOGIN_SERVER=$(az deployment group show \
-      #       --resource-group ${{ inputs.resource-group }} \
-      #       --name acr \
-      #       --query properties.outputs.acrLoginServer.value \
-      #       --output tsv)
-      #     # version: 0.0.<run_number> — increments on every CI run
-      #     VERSION="0.0.${{ github.run_number }}"
-      #     az acr login --name "${ACR_LOGIN_SERVER%%.*}"
-      #     for bicep_file in infra/acr-modules/*.bicep; do
-      #       module_name="$(basename "$bicep_file" .bicep)"
-      #       az bicep publish \
-      #         --file "$bicep_file" \
-      #         --target "br:${ACR_LOGIN_SERVER}/bicep/modules/${module_name}:${VERSION}" \
-      #         --force
-      #       az bicep publish \
-      #         --file "$bicep_file" \
-      #         --target "br:${ACR_LOGIN_SERVER}/bicep/modules/${module_name}:latest" \
-      #         --force
-      #       echo "Published ${module_name}:${VERSION} → ${ACR_LOGIN_SERVER}"
-      #     done
+      - name: Publish Bicep modules to ACR
+        run: |
+          ACR_LOGIN_SERVER=$(az deployment group show \
+            --resource-group ${{ inputs.resource-group }} \
+            --name acr \
+            --query properties.outputs.acrLoginServer.value \
+            --output tsv)
+          # version: 0.0.<run_number> — increments on every CI run
+          VERSION="0.0.${{ github.run_number }}"
+          az acr login --name "${ACR_LOGIN_SERVER%%.*}"
+          for bicep_file in infra/acr-modules/*.bicep; do
+            module_name="$(basename "$bicep_file" .bicep)"
+            az bicep publish \
+              --file "$bicep_file" \
+              --target "br:${ACR_LOGIN_SERVER}/bicep/modules/${module_name}:${VERSION}" \
+              --force
+            az bicep publish \
+              --file "$bicep_file" \
+              --target "br:${ACR_LOGIN_SERVER}/bicep/modules/${module_name}:latest" \
+              --force
+            echo "Published ${module_name}:${VERSION} → ${ACR_LOGIN_SERVER}"
+          done
 
       - name: Deploy infrastructure from ACR modules
         run: |
