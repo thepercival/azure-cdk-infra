@@ -71,7 +71,14 @@ jobs:
         run: |
           ACR_LOGIN_SERVER="${{ steps.acr.outputs.login-server }}"
           VERSION="0.0.${{ github.run_number }}"
-          CHANGED=$(git diff --name-only origin/main...HEAD -- infra/acr-modules/*.bicep)
+          git fetch origin main --depth=1 2>/dev/null || true
+          BASE=$(git merge-base origin/main HEAD 2>/dev/null || echo "")
+          if [ -z "$BASE" ] || [ "$BASE" = "$(git rev-parse HEAD)" ]; then
+            # on main or no common ancestor — publish everything
+            CHANGED=$(ls infra/acr-modules/*.bicep)
+          else
+            CHANGED=$(git diff --name-only "$BASE" HEAD -- infra/acr-modules/*.bicep)
+          fi
           for bicep_file in infra/acr-modules/*.bicep; do
             module_name="$(basename "$bicep_file" .bicep)"
             if echo "$CHANGED" | grep -qF "$bicep_file"; then
