@@ -33,6 +33,8 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Azure login
         uses: azure/login@v3
@@ -73,8 +75,8 @@ jobs:
           VERSION="0.0.${{ github.run_number }}"
           git fetch origin main --depth=1 2>/dev/null || true
           BASE=$(git merge-base origin/main HEAD 2>/dev/null || echo "")
-          if [ -z "$BASE" ] || [ "$BASE" = "$(git rev-parse HEAD)" ]; then
-            # on main or no common ancestor — publish everything
+          if [ -z "$BASE" ]; then
+            # cannot determine base — publish everything as safe fallback
             CHANGED=$(ls infra/acr-modules/*.bicep)
           else
             CHANGED=$(git diff --name-only "$BASE" HEAD -- infra/acr-modules/*.bicep)
