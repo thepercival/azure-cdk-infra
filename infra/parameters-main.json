@@ -14,7 +14,7 @@
         },
         "keyVault": {
             "value": {
-                "name": "kv-cdk",
+                "name": "kv-cdk-v2",
                 "roleAssignments": [
                     {
                         "principalId": null,
