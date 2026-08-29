@@ -18,6 +18,7 @@ var roleAssignmentAdminPrincipal = union(keyVault.roleAssignmentAdminTemplate, {
 })
 var roleAssignmentAdminPipeline = union(keyVault.roleAssignmentAdminTemplate, {
   principalId: pipelinePrincipalId
+  principalType: 'ServicePrincipal'
 })
 
 
