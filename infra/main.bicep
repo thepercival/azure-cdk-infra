@@ -2,6 +2,8 @@ param location string = resourceGroup().location
 param environment string
 @secure()
 param administratorPrincipalId string
+@secure()
+param pipelinePrincipalId string
 
 param logAnalyticsWorkspace object
 param applicationInsights object
@@ -10,6 +12,14 @@ param serviceBus object
 param openaiAccount object
 param budget object
 param apim object
+
+var roleAssignmentAdminPrincipal = union(keyVault.roleAssignmentAdminTemplate, {
+  principalId: administratorPrincipalId
+})
+var roleAssignmentAdminPipeline = union(keyVault.roleAssignmentAdminTemplate, {
+  principalId: pipelinePrincipalId
+})
+
 
 module modLogAnalyticsWorkspace 'acr-modules/log-analytics-workspace.bicep' = {
   name: 'logAnalyticsWorkspace'
@@ -35,9 +45,9 @@ module modKeyVault 'acr-modules/key-vault.bicep' = {
     keyVaultName: '${keyVault.name}-${environment}'
     location: location
     logAnalyticsWorkspaceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
-    roleAssignments: [for roleAssignment in keyVault.roleAssignments: union(roleAssignment, {
-      principalId: roleAssignment.?principalId ?? administratorPrincipalId
-    })]
+    roleAssignments: [
+        roleAssignmentAdminPrincipal, roleAssignmentAdminPipeline
+      ]
   }
 }
 

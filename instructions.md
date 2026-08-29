@@ -31,8 +31,10 @@ For each environment, go to **Settings → Environments → {env} → Environmen
 | Secret | Description |
 |---|---|
 | `AZURE_CLIENT_ID` | Application (client) ID of the CI/CD App Registration for this environment |
+| `AZURE_ENT_APP_OBJECT_ID` | Object ID of the CI/CD Enterprise Application (service principal); used for Azure RBAC assignments |
 | `AZURE_TENANT_ID` | Your Azure Tenant ID |
 | `AZURE_SUBSCRIPTION_ID` | Target Azure Subscription ID |
+| `ENTRA_ADMINPRINCIPAL_ID` | Object ID of the Entra user who receives administrator roles on deployed resources |
 
 > `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, and `AZURE_SUBSCRIPTION_ID` can differ per environment if you use separate subscriptions.
 
@@ -52,6 +54,8 @@ Create one App Registration per environment (or share one across dev/acc) for pa
    - Entity type: **Environment**
    - GitHub environment name: `dev` (repeat for `acc` and `prd`)
 6. Copy the **Application (client) ID** → set it as `AZURE_CLIENT_ID` in the matching GitHub environment secret
+7. On the app registration's **Enterprise application**, copy the **Object ID** → set it as `AZURE_ENT_APP_OBJECT_ID` in the matching GitHub environment secret
+8. In **Microsoft Entra ID → Users**, open the administrator and copy the **Object ID** → set it as `ENTRA_ADMINPRINCIPAL_ID` in the matching GitHub environment secret
 
 ---
 
