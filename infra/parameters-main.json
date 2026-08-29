@@ -12,6 +12,19 @@
                 "name": "appins-cdk"
             }
         },
+        "keyVault": {
+            "value": {
+                "name": "kv-cdk",
+                "roleAssignments": [
+                    {
+                        "principalId": null,
+                        "principalType": "User",
+                        "roleName": "Key Vault Administrator",
+                        "roleDefinitionId": "00482a5a-887f-4fb3-b363-3b7fe8e74483"
+                    }
+                ]
+            }
+        },
         "serviceBus": {
             "value": {
                 "name": "sb-cdk"

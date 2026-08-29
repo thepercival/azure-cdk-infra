@@ -1,5 +1,15 @@
 # Setup Instructions
 
+## Bicep Build Output
+
+Always include the `--outfile` parameter when running `az bicep build`. Write all generated ARM templates under `infra/arm-output/`, preserving the source-relative path:
+
+```bash
+mkdir -p infra/arm-output/acr-modules
+az bicep build --file infra/main.bicep --outfile infra/arm-output/main.json
+az bicep build --file infra/acr-modules/key-vault.bicep --outfile infra/arm-output/acr-modules/key-vault.json
+```
+
 ## GitHub Settings Steps
 
 ### 1. Create Environments

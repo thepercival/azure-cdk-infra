@@ -5,6 +5,7 @@ param administratorPrincipalId string
 
 param logAnalyticsWorkspace object
 param applicationInsights object
+param keyVault object
 param serviceBus object
 param openaiAccount object
 param budget object
@@ -25,6 +26,18 @@ module modApplicationInsights 'acr-modules/application-insights.bicep' = {
     applicationInsightsName: '${applicationInsights.name}-${environment}'
     location: location
     logAnalyticsWorkspaceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
+  }
+}
+
+module modKeyVault 'acr-modules/key-vault.bicep' = {
+  name: 'keyVault'
+  params: {
+    keyVaultName: '${keyVault.name}-${environment}'
+    location: location
+    logAnalyticsWorkspaceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
+    roleAssignments: [for roleAssignment in keyVault.roleAssignments: union(roleAssignment, {
+      principalId: roleAssignment.?principalId ?? administratorPrincipalId
+    })]
   }
 }
 
@@ -78,6 +91,10 @@ module modOpenaiAccount 'acr-modules/openai-account.bicep' = {
 
 output logAnalyticsWorkspaceId string = modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
 output logAnalyticsWorkspaceName string = modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceName
+
+output keyVaultId string = modKeyVault.outputs.keyVaultId
+output keyVaultName string = modKeyVault.outputs.keyVaultName
+output keyVaultUri string = modKeyVault.outputs.keyVaultUri
 
 output serviceBusNamespaceName string = modServicebus.outputs.serviceBusNamespaceName
 output serviceBusEndpoint string = modServicebus.outputs.serviceBusEndpoint

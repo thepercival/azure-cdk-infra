@@ -146,3 +146,4 @@ infra/acr-modules/**/*.json
 infra/main.json
 infra/acr.json
 azure-cdk-infra.code-workspace
+infra/arm-output/
