@@ -1,0 +1,111 @@
+name: Reusable — deploy Bicep to environment
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      resource-group:
+        required: true
+        type: string
+      location:
+        required: false
+        type: string
+        default: westeurope
+    secrets:
+      AZURE_CLIENT_ID:
+        required: true
+      AZURE_TENANT_ID:
+        required: true
+      AZURE_SUBSCRIPTION_ID:
+        required: true
+      AZURE_APP_REG_CLIENT_ID:
+        required: true
+      ENTRA_ADMINPRINCIPAL_ID:
+        required: true        
+
+jobs:
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
+    environment: ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Azure login
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # - name: Create resource group if not exists
+      #   run: |
+      #     az group create \
+      #       --name ${{ inputs.resource-group }} \
+      #       --location ${{ inputs.location }} \
+      #       --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy ACR
+        run: |
+          az deployment group create \
+            --resource-group ${{ inputs.resource-group }} \
+            --template-file infra/acr.bicep \
+            --parameters @infra/parameters-acr.json \
+            --parameters environment=${{ inputs.environment }}
+
+      - name: Resolve ACR login server
+        id: acr
+        run: |
+          ACR_LOGIN_SERVER=$(az deployment group show \
+            --resource-group ${{ inputs.resource-group }} \
+            --name acr \
+            --query properties.outputs.acrLoginServer.value \
+            --output tsv)
+          echo "login-server=${ACR_LOGIN_SERVER}" >> "$GITHUB_OUTPUT"
+          az acr login --name "${ACR_LOGIN_SERVER%%.*}"
+
+      # - name: Publish changed Bicep modules to ACR
+      #   run: |
+      #     ACR_LOGIN_SERVER="${{ steps.acr.outputs.login-server }}"
+      #     VERSION="0.0.${{ github.run_number }}"
+      #     git fetch origin main --depth=1 2>/dev/null || true
+      #     BASE=$(git merge-base origin/main HEAD 2>/dev/null || echo "")
+      #     if [ -z "$BASE" ]; then
+      #       # cannot determine base — publish everything as safe fallback
+      #       CHANGED=$(ls infra/acr-modules/*.bicep)
+      #     else
+      #       CHANGED=$(git diff --name-only "$BASE" HEAD -- infra/acr-modules/*.bicep)
+      #     fi
+      #     for bicep_file in infra/acr-modules/*.bicep; do
+      #       module_name="$(basename "$bicep_file" .bicep)"
+      #       if echo "$CHANGED" | grep -qF "$bicep_file"; then
+      #         az bicep publish \
+      #           --file "$bicep_file" \
+      #           --target "br:${ACR_LOGIN_SERVER}/bicep/modules/${module_name}:${VERSION}" \
+      #           --force
+      #         az bicep publish \
+      #           --file "$bicep_file" \
+      #           --target "br:${ACR_LOGIN_SERVER}/bicep/modules/${module_name}:latest" \
+      #           --force
+      #         echo "Published  ${module_name}:${VERSION}"
+      #       else
+      #         echo "Unchanged  ${module_name} — skipped"
+      #       fi
+      #     done
+
+      - name: Deploy infrastructure from ACR modules
+        run: |
+          ACR_LOGIN_SERVER="${{ steps.acr.outputs.login-server }}"
+          sed -i "s|acrcdkdev.azurecr.io|${ACR_LOGIN_SERVER}|g" bicepconfig.json
+          az deployment group create \
+            --resource-group ${{ inputs.resource-group }} \
+            --template-file infra/main.bicep \
+            --parameters @infra/parameters-main.json \
+            --parameters environment=${{ inputs.environment }} administratorPrincipalId=${{ secrets.ENTRA_ADMINPRINCIPAL_ID }} pipelinePrincipalId=${{ secrets.AZURE_APP_REG_CLIENT_ID }}
