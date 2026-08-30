@@ -45,12 +45,12 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Create resource group if not exists
-        run: |
-          az group create \
-            --name ${{ inputs.resource-group }} \
-            --location ${{ inputs.location }} \
-            --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      # - name: Create resource group if not exists
+      #   run: |
+      #     az group create \
+      #       --name ${{ inputs.resource-group }} \
+      #       --location ${{ inputs.location }} \
+      #       --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Deploy ACR
         run: |
