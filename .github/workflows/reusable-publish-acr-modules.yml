@@ -52,18 +52,21 @@ jobs:
           ACR_LOGIN_SERVER="${{ steps.acr.outputs.login-server }}"
           ACR_NAME="${ACR_LOGIN_SERVER%%.*}"
           VERSION="0.0.${{ github.run_number }}"
+          mkdir -p infra/arm-output/acr-modules
 
           for bicep_file in infra/acr-modules/*.bicep; do
             module_name="$(basename "$bicep_file" .bicep)"
             repository="bicep/modules/${module_name}"
-            checksum="$(sha256sum "$bicep_file" | cut -d ' ' -f 1)"
-            checksum_tag_prefix="sha256-${checksum}-"
-            checksum_tag="${checksum_tag_prefix}${VERSION}"
+            compiled_file="infra/arm-output/acr-modules/${module_name}.json"
+            az bicep build --file "$bicep_file" --outfile "$compiled_file"
+            checksum="$(sha256sum "$compiled_file" | cut -d ' ' -f 1)"
+            checksum_tag_suffix="-sha256-${checksum}"
+            checksum_tag="${VERSION}${checksum_tag_suffix}"
 
             existing_checksum_tag=$(az acr repository show-tags \
               --name "$ACR_NAME" \
               --repository "$repository" \
-              --output tsv 2>/dev/null | grep -m1 "^${checksum_tag_prefix}" || true)
+              --output tsv 2>/dev/null | grep -m1 -- "${checksum_tag_suffix}$" || true)
 
             if [[ -n "$existing_checksum_tag" ]]; then
               echo "Unchanged ${module_name}; checksum already published as ${existing_checksum_tag}"
