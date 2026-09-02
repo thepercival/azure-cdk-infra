@@ -22,6 +22,17 @@ jobs:
       resource-group: rg-core-dev
     secrets: inherit
 
+  publish-dev-modules:
+    needs: deploy-dev
+    uses: ./.github/workflows/reusable-publish-acr-modules.yml
+    permissions:
+      id-token: write
+      contents: read
+    with:
+      environment: dev
+      resource-group: rg-core-dev
+    secrets: inherit
+
   deploy-acc:
     if: github.event.pull_request.merged == true
     uses: ./.github/workflows/reusable-deploy.yml
@@ -33,9 +44,31 @@ jobs:
       resource-group: rg-core-acc
     secrets: inherit
 
+  publish-acc-modules:
+    needs: deploy-acc
+    uses: ./.github/workflows/reusable-publish-acr-modules.yml
+    permissions:
+      id-token: write
+      contents: read
+    with:
+      environment: acc
+      resource-group: rg-core-acc
+    secrets: inherit
+
   deploy-prd:
     needs: deploy-acc
     uses: ./.github/workflows/reusable-deploy.yml
+    permissions:
+      id-token: write
+      contents: read
+    with:
+      environment: prd
+      resource-group: rg-core-prd
+    secrets: inherit
+
+  publish-prd-modules:
+    needs: deploy-prd
+    uses: ./.github/workflows/reusable-publish-acr-modules.yml
     permissions:
       id-token: write
       contents: read

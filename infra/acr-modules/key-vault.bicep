@@ -17,6 +17,7 @@ resource resKeyVault 'Microsoft.KeyVault/vaults@2024-11-01' = {
     softDeleteRetentionInDays: 90
     enablePurgeProtection: true
     publicNetworkAccess: 'Enabled'
+    enabledForTemplateDeployment: true
   }
 }
 

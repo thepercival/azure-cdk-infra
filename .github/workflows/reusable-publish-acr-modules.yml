@@ -1,0 +1,86 @@
+name: Reusable - publish Bicep modules to ACR
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      resource-group:
+        required: true
+        type: string
+    secrets:
+      AZURE_CLIENT_ID:
+        required: true
+      AZURE_TENANT_ID:
+        required: true
+      AZURE_SUBSCRIPTION_ID:
+        required: true
+
+jobs:
+  publish:
+    name: Publish modules to ${{ inputs.environment }}
+    environment: ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Azure login
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Resolve ACR login server
+        id: acr
+        run: |
+          ACR_LOGIN_SERVER=$(az deployment group show \
+            --resource-group "${{ inputs.resource-group }}" \
+            --name acr \
+            --query properties.outputs.acrLoginServer.value \
+            --output tsv)
+          echo "login-server=${ACR_LOGIN_SERVER}" >> "$GITHUB_OUTPUT"
+          az acr login --name "${ACR_LOGIN_SERVER%%.*}"
+
+      - name: Publish changed Bicep modules
+        shell: bash
+        run: |
+          ACR_LOGIN_SERVER="${{ steps.acr.outputs.login-server }}"
+          ACR_NAME="${ACR_LOGIN_SERVER%%.*}"
+          VERSION="0.0.${{ github.run_number }}"
+
+          for bicep_file in infra/acr-modules/*.bicep; do
+            module_name="$(basename "$bicep_file" .bicep)"
+            repository="bicep/modules/${module_name}"
+            checksum="$(sha256sum "$bicep_file" | cut -d ' ' -f 1)"
+            checksum_tag_prefix="sha256-${checksum}-"
+            checksum_tag="${checksum_tag_prefix}${VERSION}"
+
+            existing_checksum_tag=$(az acr repository show-tags \
+              --name "$ACR_NAME" \
+              --repository "$repository" \
+              --output tsv 2>/dev/null | grep -m1 "^${checksum_tag_prefix}" || true)
+
+            if [[ -n "$existing_checksum_tag" ]]; then
+              echo "Unchanged ${module_name}; checksum already published as ${existing_checksum_tag}"
+              continue
+            fi
+
+            az bicep publish \
+              --file "$bicep_file" \
+              --target "br:${ACR_LOGIN_SERVER}/${repository}:${VERSION}" \
+              --force
+            az bicep publish \
+              --file "$bicep_file" \
+              --target "br:${ACR_LOGIN_SERVER}/${repository}:latest" \
+              --force
+            az bicep publish \
+              --file "$bicep_file" \
+              --target "br:${ACR_LOGIN_SERVER}/${repository}:${checksum_tag}" \
+              --force
+            echo "Published ${module_name}:${VERSION} with checksum tag ${checksum_tag}"
+          done
