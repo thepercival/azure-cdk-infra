@@ -47,6 +47,12 @@
                         "principalType": "User",
                         "roleName": "Cognitive Services User",
                         "roleDefinitionId": "a97b65f3-24c7-4388-baec-2e87135dc908"
+                    },
+                    {
+                        "principalName": "cdkdev",
+                        "principalType": "User",
+                        "roleName": "Foundry Project Manager",
+                        "roleDefinitionId": "eadc314b-1a2d-4efa-be10-5d325db5065e"
                     }
                 ],
                 "deployments": [

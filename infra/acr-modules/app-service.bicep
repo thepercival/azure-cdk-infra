@@ -1,7 +1,9 @@
 param appServiceName string
 param appKind string
 param location string 
-param additionEnvironmentVariables array
+param additionalSharedEnvironmentVariables array
+param additionalProductionOnlyEnvironmentVariables array = []
+param additionalStagingOnlyEnvironmentVariables array = []
 param linuxFxVersion string 
 param appServicePlanId string
 param appInsightsConnectionString string
@@ -10,7 +12,7 @@ param withStagingSlot bool
 param restrictToApim bool = false
 param startupCommand string = 'node dist/server.js'
 
-var baseEnvironmentVariables = [
+var baseSharedEnvironmentVariables = [
   {
     name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
     value: appInsightsConnectionString
@@ -21,9 +23,12 @@ var baseEnvironmentVariables = [
   }
 ]
 
-var environmentVariables = concat(baseEnvironmentVariables, additionEnvironmentVariables)
+var sharedEnvironmentVariables = concat(baseSharedEnvironmentVariables, additionalSharedEnvironmentVariables)
+var stagingEnvironmentVariables = concat(sharedEnvironmentVariables, additionalStagingOnlyEnvironmentVariables)
+var productionEnvironmentVariables = concat(sharedEnvironmentVariables, additionalProductionOnlyEnvironmentVariables)
 
-
+// only settings that can actually differ between slots need to be sticky
+var stickyAppSettingNames = [for item in concat(additionalProductionOnlyEnvironmentVariables, additionalStagingOnlyEnvironmentVariables): item.name]
 
 var apimOnlyRestrictions = [
   {
@@ -35,20 +40,19 @@ var apimOnlyRestrictions = [
     ipAddress: 'ApiManagement'
   }
 ]
-
-var siteConfigBase = {
-  appSettings: environmentVariables
+var apimRestrictionConfig = {
+  ipSecurityRestrictions: apimOnlyRestrictions
+  ipSecurityRestrictionsDefaultAction: 'Deny'
+  scmIpSecurityRestrictions: apimOnlyRestrictions
+  scmIpSecurityRestrictionsDefaultAction: 'Deny'
+}
+var siteConfigCommon = {
   linuxFxVersion: linuxFxVersion
   minTlsVersion: '1.2'  
   appCommandLine: startupCommand
 }
 
-var siteConfig = restrictToApim ? union(siteConfigBase, {
-  ipSecurityRestrictions: apimOnlyRestrictions
-  ipSecurityRestrictionsDefaultAction: 'Deny'
-  scmIpSecurityRestrictions: apimOnlyRestrictions
-  scmIpSecurityRestrictionsDefaultAction: 'Deny'
-}) : siteConfigBase
+var siteConfigWithApim = restrictToApim ? union(siteConfigCommon, apimRestrictionConfig) : siteConfigCommon
 
 resource resAppService 'Microsoft.Web/sites@2025-03-01' = {
   name: appServiceName
@@ -60,7 +64,7 @@ resource resAppService 'Microsoft.Web/sites@2025-03-01' = {
   properties: {
     serverFarmId: appServicePlanId    
     httpsOnly: true
-    siteConfig: siteConfig
+    siteConfig: union(siteConfigWithApim, { appSettings: productionEnvironmentVariables })
   }
 }
 
@@ -75,25 +79,22 @@ resource resWebAppSlot 'Microsoft.Web/sites/slots@2025-03-01' = if(withStagingSl
     type: 'SystemAssigned'
   }
   properties: {
-    siteConfig: {
-      appSettings: environmentVariables
-      linuxFxVersion: linuxFxVersion
-      minTlsVersion: '1.2'
-    }
+    // only appSettings/appCommandLine differ from production — restrictions must stay identical
+    siteConfig: union(siteConfigWithApim, { appSettings: stagingEnvironmentVariables })
   }
 }
 
-// STICKY SLOT CONFIGURATION
-// resource resAppServiceSlotConfig 'Microsoft.Web/sites/config@2024-04-01' = {
-//   parent: resAppService
-//   name: 'slotConfigNames'
-//   properties: {
-//     appSettingNames: concat([
-//       'API_TOKEN'
-//       'API_BASEURL'
-//     ], slotSqlAppSettingNames)
-//   }
-// }
+@description('marks settings that differ per slot as sticky, so a swap does not move their values, define seperate above')
+resource resAppServiceSlotConfig 'Microsoft.Web/sites/config@2024-04-01' = if(withStagingSlot) {
+  parent: resAppService
+  name: 'slotConfigNames'
+  properties: {
+    appSettingNames: stickyAppSettingNames
+  }
+  dependsOn: [
+    resWebAppSlot
+  ]
+}
 
 var diagnosticsKind = contains(toLower(appKind), 'functionapp') ? 'functionapp' : 'webapp'
 module diagnostics 'app-diagnostics.bicep' = {

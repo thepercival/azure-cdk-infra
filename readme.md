@@ -334,12 +334,14 @@ Deployments are **account-scoped**, not project-scoped — all projects share th
 
 ```
 aoai-cdk account
-  ├── gpt-5-mini        → 10,000 TPM  (account-wide pool)
-  ├── Codestral-2501    → 10,000 TPM  (account-wide pool)
+  ├── modelDeployments
+  │     ├── gpt-5-mini        → 10,000 TPM  (account-wide pool)
+  │     └── Codestral-2501    → 10,000 TPM  (account-wide pool)
   │
-  ├── project: teamA   ─┐
-  ├── project: teamB   ─┼─ all compete for the same TPM quota
-  └── project: teamC   ─┘
+  └── projects
+        ├── teamA   ─┐
+        ├── teamB   ─┼─ all compete for the same TPM quota
+        └── teamC   ─┘
 ```
 
 **Add a second account when:**
@@ -371,3 +373,102 @@ rg-project-teamB/
 ```
 
 The `openai-project.bicep` module already outputs `principalId` — pass it into each business project's own Bicep deployment to create the cross-resource-group role assignments.
+
+## Voorstel: gedeelde User/Auth-module voor meerdere apps
+
+> Status: **voorstel, nog niet geïmplementeerd**. Vastgelegd als referentie voor besluitvorming en vervolgstappen.
+
+Doel: 3-4 Angular-apps delen dezelfde gebruikersmodule (login, registratie, wachtwoord-vergeten, profiel) + autorisatie, met per-app configureerbare tweaks (json/yaml), zonder codeduplicatie.
+
+> **Geen Azure Cosmos DB** — dit repo gebruikt momenteel geen Cosmos DB. Voor de user-store wordt een **externe MongoDB-instantie** gebruikt op `db.cdkdev.nl`, waar admin-rechten beschikbaar zijn. Deze staat los van Azure en van Cosmos DB's MongoDB-API.
+
+> **Aanmelden**: uitsluitend via **e-mailadres/wachtwoord** — geen social login of externe IdP in dit voorstel.
+
+### Architectuur op hoofdlijnen
+
+```mermaid
+graph TB
+    subgraph Apps["3-4 Angular apps (aparte repo's)"]
+        A1["App 1"]
+        A2["App 2"]
+        A3["App 3"]
+    end
+
+    subgraph Shared["@yourorg/user-ui (npm package, aparte repo)"]
+        UI["Login / Register / Forgot-password /\nProfile / Guards / Interceptors"]
+    end
+
+    subgraph API["user-api (aparte repo, container/app service)"]
+        AUTH["Auth endpoints\n(login, register, refresh, roles)"]
+        CFG["Config-laag\n(json/yaml per app)"]
+    end
+
+    subgraph Infra["azure-cdk-infra (dit repo)"]
+        KV["Key Vault - secrets/JWT keys\n+ MongoDB-connectionstring"]
+        APPCFG["Azure App Configuration\n(per-app tweaks)"]
+        HOST["App Service / Container App\nvoor user-api"]
+    end
+
+    subgraph External["Externe infra"]
+        MONGO["MongoDB\ndb.cdkdev.nl (admin-toegang)"]
+    end
+
+    A1 --> UI
+    A2 --> UI
+    A3 --> UI
+    UI --> AUTH
+    AUTH --> CFG
+    CFG --> APPCFG
+    AUTH --> MONGO
+    AUTH --> KV
+    HOST -.hosts.-> AUTH
+```
+
+### Repository-indeling (3 nieuwe repo's naast dit infra-repo)
+
+| Repo | Inhoud | Publiceert |
+|---|---|---|
+| `user-ui` | Angular library (login, register, wachtwoord vergeten, profiel, route-guards, HTTP-interceptor voor JWT) | npm package via GitHub Packages / Azure Artifacts |
+| `user-api` | Backend (.NET of Node) met auth-logica, user-CRUD, rollen/claims | Container image → ACR (bestaand: `acr.bicep`) |
+| `azure-cdk-infra` (dit repo) | Infra voor `user-api` hosting + MongoDB-connectiviteit + Key Vault + App Configuration | Bicep modules, per environment |
+
+Elke app-repo neemt alleen de `user-ui`-package als dependency (versie-gepind); de API draait één keer centraal — geen codeduplicatie, wel per-app config.
+
+### Angular shared module (`user-ui`)
+
+- Angular library met standalone components (`LoginComponent`, `RegisterComponent`, `AuthGuard`, `AuthInterceptor`).
+- Configureerbaar via een `InjectionToken` (`USER_UI_CONFIG`) die elke consumerende app invult: verplichte velden, actieve auth-methodes, branding/labels.
+- Semver + changelog; apps upgraden bewust.
+- Styling volgt bestaande design-tokens/CSS-vars van elke host-app (geen ingebakken SCSS).
+
+### `user-api`: auth + configureerbaarheid
+
+- **Auth**: alleen e-mailadres/wachtwoord — JWT (access + refresh token), wachtwoord-hashing (bcrypt/argon2). Geen social login of extern IdP in scope van dit voorstel.
+- **Autorisatie**: rollen + claims per applicatie (`appId`-claim in token) zodat één user-store meerdere apps bedient zonder dat rollen door elkaar lopen.
+- **Config-driven tweaks**: per consumerende app een JSON/YAML-config (wachtwoordbeleid, verplichte velden, registratie aan/uit) — opgeslagen in Azure App Configuration of een config-collectie in MongoDB, ingeladen op `appId`.
+- Multi-tenant datamodel in MongoDB: elk `user`-document krijgt een `appId`/`tenantId`-veld voor isolatie tussen apps; alternatief is een database-per-app als harde isolatie nodig is.
+
+### Data: MongoDB (extern, geen Cosmos DB)
+
+- Bestaande externe MongoDB-instantie op `db.cdkdev.nl` (admin-toegang beschikbaar) — geen nieuwe Azure-resource nodig voor hosting.
+- Connectiestring wordt als secret in Key Vault gezet; `user-api` leest deze via managed identity, geen credentials in code/config.
+- Eén gedeelde database `users` met per-app scheiding via `appId`-veld, of database-per-app bij hardere isolatie-eisen.
+- Netwerktoegang vanaf Azure naar `db.cdkdev.nl` moet expliciet worden opengesteld (firewall/allow-list) op de externe server.
+
+### Infra-toevoegingen in dit repo
+
+Nieuwe module(s), volgens bestaand patroon (zie [main.bicep](infra/main.bicep), parameters per component):
+- `acr-modules/user-api-appservice.bicep` (of container app) — hergebruik `app-service.bicep` / `app-serviceplan.bicep`.
+- Key Vault entries voor JWT-signing key en de MongoDB-connectionstring naar `db.cdkdev.nl` (RBAC-only, zoals Service Bus nu al doet).
+- Optioneel: Azure App Configuration resource voor de per-app config/tweaks.
+- APIM: `user-api` achter de bestaande APIM zetten (`apim.bicep`/`apim-api.bicep`) zodat alle apps via één gateway met rate-limiting/policies gaan.
+- Geen MongoDB-hostingmodule nodig — de database is extern en al beschikbaar.
+
+### CI/CD
+
+Zelfde patroon als nu: per environment (`dev`/`acc`/`prd`) een Bicep-deploy voor de nieuwe resources, en een aparte pipeline in de `user-api`/`user-ui`-repo's voor build+publish van de package/image.
+
+### Openstaande besluiten
+1. Databasestrategie: één MongoDB-database met `appId`-scheiding, of per-app database op `db.cdkdev.nl`.
+2. Netwerktoegang: hoe Azure (App Service/Container App) veilig bij `db.cdkdev.nl` kan (VPN, private endpoint, IP-allowlist).
+3. Welke nieuwe Bicep-modules dit repo krijgt voor hosting van `user-api` + Key Vault + (optioneel) App Configuration.
