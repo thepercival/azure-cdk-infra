@@ -29,6 +29,7 @@ resource resAiProject 'Microsoft.CognitiveServices/accounts/projects@2026-03-01'
 module modFoundryProjectRoleAssignments './openai-project-roleassignments.bicep' = {
   name: 'modFoundryProjectRoleAssignments'
   params: {
+    foundryName: accountName
     foundryProjectName: name
     roleAssignments: roleAssignments
   }

@@ -41,6 +41,12 @@
                         "principalType": "User",
                         "roleName": "Foundry Project Manager",
                         "roleDefinitionId": "eadc314b-1a2d-4efa-be10-5d325db5065e"
+                    },
+                    {
+                        "principalName": "github-fctoernooi-llm",
+                        "principalType": "ServicePrincipal",
+                        "roleName": "Foundry Project Manager",
+                        "roleDefinitionId": "eadc314b-1a2d-4efa-be10-5d325db5065e"
                     }
                 ],
                 "deployments": [

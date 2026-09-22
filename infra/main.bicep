@@ -26,7 +26,7 @@ var kvRoleAssignmentAdminPipeline = union(keyVault.roleAssignmentAdminTemplate, 
 
 var roleAssignmentTemplates FoundryAccountRoleAssignmentTemplate[] = openaiAccount.roleAssignmentTemplates
 var accountRoleAssignments FoundryAccountRoleAssignment[] = [for roleAssignmentTemplate in roleAssignmentTemplates: union(roleAssignmentTemplate, {
-  principalId: administratorPrincipalId
+  principalId: roleAssignmentTemplate.?principalType == 'User' ? administratorPrincipalId : pipelinePrincipalId
 })]
 
 var projectsWithRoleAssignments = [for project in openaiAccount.projects: union(project, {
