@@ -15,13 +15,25 @@ param openaiAccount object
 param budget object
 param apim object
 
-var roleAssignmentAdminPrincipal = union(keyVault.roleAssignmentAdminTemplate, {
+
+var kvRoleAssignmentAdminPrincipal = union(keyVault.roleAssignmentAdminTemplate, {
   principalId: administratorPrincipalId
 })
-var roleAssignmentAdminPipeline = union(keyVault.roleAssignmentAdminTemplate, {
+var kvRoleAssignmentAdminPipeline = union(keyVault.roleAssignmentAdminTemplate, {
   principalId: pipelinePrincipalId
   principalType: 'ServicePrincipal'
 })
+
+var roleAssignmentTemplates FoundryAccountRoleAssignmentTemplate[] = openaiAccount.roleAssignmentTemplates
+var accountRoleAssignments FoundryAccountRoleAssignment[] = [for roleAssignmentTemplate in roleAssignmentTemplates: union(roleAssignmentTemplate, {
+  principalId: administratorPrincipalId
+})]
+
+var projectsWithRoleAssignments = [for project in openaiAccount.projects: union(project, {
+  roleAssignments: map(project.roleAssignmentTemplates, roleAssignmentTemplate => union(roleAssignmentTemplate, {
+    principalId: administratorPrincipalId
+  }))
+})]
 
 
 module modLogAnalyticsWorkspace 'acr-modules/log-analytics-workspace.bicep' = {
@@ -49,7 +61,7 @@ module modKeyVault 'acr-modules/key-vault.bicep' = {
     location: location
     logAnalyticsWorkspaceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
     roleAssignments: [
-        roleAssignmentAdminPrincipal, roleAssignmentAdminPipeline
+        kvRoleAssignmentAdminPrincipal, kvRoleAssignmentAdminPipeline
       ]
   }
 }
@@ -86,22 +98,16 @@ module modServicebus 'acr-modules/servicebus.bicep' = {
   }
 }
 
-
-var roleAssignmentTemplates FoundryAccountRoleAssignmentTemplate[] = openaiAccount.roleAssignmentTemplates
-var roleAssignments FoundryAccountRoleAssignment[] = [for roleAssignmentTemplate in roleAssignmentTemplates: union(roleAssignmentTemplate, {
-  principalId: administratorPrincipalId
-})]
-
 module modOpenaiAccount 'acr-modules/openai-account.bicep' = {
   name: 'modOpenaiAccount'
   params: {
     location: location
     sku: openaiAccount.sku
     openAiAccountName: '${openaiAccount.name}-${environment}'
-    roleAssignments: roleAssignments
+    roleAssignments: accountRoleAssignments
     logAnalyticsWorkspaceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
     deployments: openaiAccount.deployments
-    projects: openaiAccount.projects
+    projects: projectsWithRoleAssignments
     dashboard: openaiAccount.dashboard
     apiGateway: openaiAccount.apiGateway
     environment: environment
