@@ -1,3 +1,5 @@
+import { FoundryAccountRoleAssignment, FoundryAccountRoleAssignmentTemplate } from 'acr-modules/types.bicep'
+
 param location string = resourceGroup().location
 param environment string
 @secure()
@@ -83,15 +85,21 @@ module modServicebus 'acr-modules/servicebus.bicep' = {
     location: location
   }
 }
+
+
+var roleAssignmentTemplates FoundryAccountRoleAssignmentTemplate[] = openaiAccount.roleAssignmentTemplates
+var roleAssignments FoundryAccountRoleAssignment[] = [for roleAssignmentTemplate in roleAssignmentTemplates: union(roleAssignmentTemplate, {
+  principalId: administratorPrincipalId
+})]
+
 module modOpenaiAccount 'acr-modules/openai-account.bicep' = {
   name: 'modOpenaiAccount'
   params: {
     location: location
     sku: openaiAccount.sku
     openAiAccountName: '${openaiAccount.name}-${environment}'
-    roleAssignments: openaiAccount.roleAssignments
+    roleAssignments: roleAssignments
     logAnalyticsWorkspaceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
-    administratorPrincipalId: administratorPrincipalId
     deployments: openaiAccount.deployments
     projects: openaiAccount.projects
     dashboard: openaiAccount.dashboard

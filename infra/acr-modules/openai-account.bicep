@@ -1,16 +1,15 @@
+import { FoundryAccountRoleAssignment } from 'types.bicep'
+
 param environment string
 param location string
 param openAiAccountName string
-param roleAssignments array
+param roleAssignments FoundryAccountRoleAssignment[]
 param logAnalyticsWorkspaceId string
 param deployments array
 param projects array
 param dashboard object
 param sku object
 param apiGateway object
-
-@secure()
-param administratorPrincipalId string
 
 resource resOpenaiAccount 'Microsoft.CognitiveServices/accounts@2026-03-01' = {
   name: openAiAccountName
@@ -27,16 +26,15 @@ resource resOpenaiAccount 'Microsoft.CognitiveServices/accounts@2026-03-01' = {
   }
 }
 
-// Role assignments at account level (for account-wide management permissions)
-resource foundryRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for roleAssignment in roleAssignments: {
-  name: guid(resOpenaiAccount.id, administratorPrincipalId, roleAssignment.roleDefinitionId)
-  scope: resOpenaiAccount
-  properties: {
-    principalId: administratorPrincipalId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleAssignment.roleDefinitionId)
-    principalType: roleAssignment.principalType
+module modOpenaiAccountRoleAssignment './openai-account-roleassignments.bicep' = {
+  name: 'modOpenaiAccountRoleAssignment'
+  params: {
+    openAiAccountName: resOpenaiAccount.name
+    roleAssignments: roleAssignments
   }
-}]
+}
+
+
 
 // Diagnostic settings for Application Insights integration
 resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {

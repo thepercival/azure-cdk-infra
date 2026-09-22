@@ -35,19 +35,7 @@
                 "sku": {
                     "name": "S0"
                 },
-                "roleAssignments": [
-                    {
-                        "principalName": "cdkdev",
-                        "principalType": "User",
-                        "roleName": "Cognitive Services Contributor",
-                        "roleDefinitionId": "25fbc0a9-bd7c-42a3-aa1a-3b75d497ee68"
-                    },
-                    {
-                        "principalName": "cdkdev",
-                        "principalType": "User",
-                        "roleName": "Cognitive Services User",
-                        "roleDefinitionId": "a97b65f3-24c7-4388-baec-2e87135dc908"
-                    },
+                "roleAssignmentTemplates": [
                     {
                         "principalName": "cdkdev",
                         "principalType": "User",
@@ -75,7 +63,7 @@
                             "acc": false,
                             "prd": false
                         },
-                        "roleAssignments": [
+                        "roleAssignmentTemplates": [
                             {
                                 "projectPrincipalId": null,
                                 "projectPrincipalType": "ServicePrincipal",
