@@ -59,17 +59,16 @@ jobs:
             repository="bicep/modules/${module_name}"
             compiled_file="infra/arm-output/acr-modules/${module_name}.json"
             az bicep build --file "$bicep_file" --outfile "$compiled_file"
-            checksum="$(sha256sum "$compiled_file" | cut -d ' ' -f 1)"
-            checksum_tag_suffix="-sha256-${checksum}"
-            checksum_tag="${VERSION}${checksum_tag_suffix}"
+            # Strip the compiler metadata (bicep version/templateHash) so a Bicep CLI upgrade doesn't change the checksum
+            checksum="$(jq -S 'walk(if type == "object" then del(._generator) else . end)' "$compiled_file" | sha256sum | cut -d ' ' -f 1)"
+            checksum_tag="sha256-${checksum}"
 
-            existing_checksum_tag=$(az acr repository show-tags \
+            # Exact lookup; listing tags is paginated and can miss the checksum tag
+            if az acr repository show \
               --name "$ACR_NAME" \
-              --repository "$repository" \
-              --output tsv 2>/dev/null | grep -m1 -- "${checksum_tag_suffix}$" || true)
-
-            if [[ -n "$existing_checksum_tag" ]]; then
-              echo "Unchanged ${module_name}; checksum already published as ${existing_checksum_tag}"
+              --image "${repository}:${checksum_tag}" \
+              --output none 2>/dev/null; then
+              echo "Unchanged ${module_name}; checksum already published as ${checksum_tag}"
               continue
             fi
 
