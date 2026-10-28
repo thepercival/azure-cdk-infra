@@ -3,6 +3,9 @@ param apiManagementName string
 param backend object
 param openapiLink string
 
+@description('Browser origins allowed to call this API (CORS). Leave empty to add no CORS policy.')
+param corsOrigins array = []
+
 resource resApiManagement 'Microsoft.ApiManagement/service@2021-08-01' existing = {
   name: apiManagementName
 }
@@ -50,17 +53,37 @@ module modProduct './apim-product.bicep' = {
   dependsOn: [resApi]
 }
 
+// Preflight (OPTIONS) requests are answered by the cors policy itself; no OPTIONS operations are needed.
+// Multi-line strings do not interpolate, hence format().
+var corsOriginsXml = join(map(corsOrigins, origin => '<origin>${origin}</origin>'), '')
+var corsPolicy = empty(corsOrigins) ? '' : format('''
+
+    <cors allow-credentials="false">
+      <allowed-origins>{0}</allowed-origins>
+      <allowed-methods preflight-result-max-age="300">
+        <method>GET</method>
+        <method>POST</method>
+        <method>PUT</method>
+        <method>PATCH</method>
+        <method>DELETE</method>
+        <method>OPTIONS</method>
+      </allowed-methods>
+      <allowed-headers>
+        <header>Authorization</header>
+        <header>Content-Type</header>
+      </allowed-headers>
+    </cors>''', corsOriginsXml)
+
 resource apiPolicy 'Microsoft.ApiManagement/service/apis/policies@2022-08-01' = {
   name: 'policy'
   parent: resApi
   properties: {
     format: 'rawxml'
-#disable-next-line prefer-interpolation
-    value: concat('''
+    value: format('''
 <policies>
   <inbound>
-    <base />
-    <set-backend-service backend-id="''', backend.name, '''" />
+    <base />{0}
+    <set-backend-service backend-id="{1}" />
   </inbound>
   <backend>
     <forward-request />
@@ -72,7 +95,7 @@ resource apiPolicy 'Microsoft.ApiManagement/service/apis/policies@2022-08-01' = 
     <base />
   </on-error>
 </policies>
-''')
+''', corsPolicy, backend.name)
   }
 }
 
